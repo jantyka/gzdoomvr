@@ -1,4 +1,7 @@
 # GZDoomVR 
+
+> **Linux:** this fork builds and runs natively on Linux with SteamVR. See [LINUX.md](LINUX.md) for building
+> and [linux/README.md](linux/README.md) for the controller setup with Valve Index controllers.
 This is a VR fork of GZDoom based on gz3doom http://rotatingpenguin.com/gz3doom/, OpenVR Doom https://github.com/Fishbiter/gz3doom and QuestZDoom https://github.com/DrBeef/QuestZDoom.
 
 The build has been developed and tested on the Meta Quest using Virtual Desktop. However, it should also work with other VR setups that are compatible with the OpenVR API.
