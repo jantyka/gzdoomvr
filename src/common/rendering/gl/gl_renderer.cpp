@@ -60,6 +60,13 @@
 
 EXTERN_CVAR(Int, screenblocks)
 
+#ifdef USE_OPENVR
+namespace s3d
+{
+	void OpenVR_FlushControllerModels();
+}
+#endif
+
 namespace OpenGLRenderer
 {
 
@@ -106,6 +113,9 @@ void FGLRenderer::Initialize(int width, int height)
 FGLRenderer::~FGLRenderer() 
 {
 	FlushModels();
+#ifdef USE_OPENVR
+	s3d::OpenVR_FlushControllerModels();
+#endif
 	TexMan.FlushAll();
 	if (mShaderManager != nullptr) delete mShaderManager;
 	if (mSamplerManager != nullptr) delete mSamplerManager;
