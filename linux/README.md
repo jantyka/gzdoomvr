@@ -200,3 +200,17 @@ the top and bottom. `index_controller.cfg` sets it to 1.
 - **The game crashes.** It writes `gzdoomvr-crash.log` into the directory you started it
   from. SteamVR's own logs are in `~/.local/share/Steam/logs/` (`vrserver.txt`,
   `vrcompositor.txt`, `vrclient_gzdoomvr.txt`).
+
+**Still stuck, or found a bug?** Please
+[open an issue](https://github.com/jantyka/gzdoomvr/issues). Look through the existing
+ones first, and check the known issues in [LINUX.md](../LINUX.md#known-issues). A report
+is most useful with:
+
+- headset and controllers, distribution, GPU and driver version, SteamVR version,
+- the branch or build you used and the command line you started the game with,
+- what you did, what you expected, and what happened instead,
+- `gzdoomvr-crash.log` if the game crashed, and for controller problems the lines
+  containing `gzdoomvr` from `vrserver.txt`.
+
+Problems of the Windows builds, or of the game on other platforms, belong to
+[upstream](https://github.com/hh79/gzdoomvr/issues).
