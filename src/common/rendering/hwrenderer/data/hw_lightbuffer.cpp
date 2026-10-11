@@ -52,8 +52,9 @@ FLightBuffer::FLightBuffer(int pipelineNbr):
 	{
 		mBufferType = false;
 		mBlockSize = screen->maxuniformblock / ELEMENT_SIZE;
-		// Mesa (radeonsi) reports an offset alignment of 4 bytes, less than one element. Without the
-		// lower bound mBlockAlign is 0 and GetBinding() divides by zero as soon as a dynamic light is drawn.
+		// Not platform specific: Mesa 26.2 (radeonsi) reports GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT = 4
+		// (see "glxinfo -l"), less than one element. Without the lower bound mBlockAlign is 0 and
+		// GetBinding() divides by zero as soon as a dynamic light is drawn.
 		mBlockAlign = screen->uniformblockalignment < ELEMENT_SIZE ? 1 : screen->uniformblockalignment / ELEMENT_SIZE;
 		mMaxUploadSize = (mBlockSize - mBlockAlign);
 
