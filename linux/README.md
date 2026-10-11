@@ -1,0 +1,187 @@
+# Playing GZDoomVR on Linux with Index controllers
+
+This guide starts where [LINUX.md](../LINUX.md) ends: you have built `build/gzdoomvr`.
+It covers the first start, the controller layout and how to change it, and mods.
+
+Files in this directory:
+
+| File | What it does |
+|---|---|
+| `steamvr_bindings/index_legacy.json` | Tells SteamVR which physical button reaches the game as which key. |
+| `steamvr_bindings/select_binding.sh` | Selects that binding in a running SteamVR. |
+| `index_controller.cfg` | Assigns game actions to those keys. Edit this one to change the layout. |
+| `index_controller_brutaldoom.cfg` | Additional assignments for Brutal Doom. |
+
+## First start
+
+1. Start SteamVR from Steam and switch on headset and controllers.
+2. Start the game once, so that SteamVR gets to know it, and quit it again:
+
+   ```
+   ./build/gzdoomvr -iwad /path/to/DOOM2.WAD
+   ```
+
+3. Select the Index binding while SteamVR is still running:
+
+   ```
+   linux/steamvr_bindings/select_binding.sh
+   ```
+
+   SteamVR remembers the choice together with the path of the file. Run the script again
+   if you move the repository. It refuses paths with spaces or special characters; in
+   that case load `index_legacy.json` by hand in SteamVR under Settings -> Controllers ->
+   Manage Controller Bindings.
+
+4. Start the game with the key bindings:
+
+   ```
+   ./build/gzdoomvr -iwad /path/to/DOOM2.WAD +exec "$PWD/linux/index_controller.cfg"
+   ```
+
+   The bindings are saved to `~/.config/gzdoomvr/gzdoomvr.ini`. You only need `+exec`
+   again after you changed the file. The path must be a full path.
+
+Why the binding is needed: SteamVR's own default for old ("legacy") games reports the A
+buttons of the Index as grip, so the game can never tell them apart, and it reports a
+thumbstick pushed to the edge as a click.
+
+## Controls
+
+This is the layout from `index_controller.cfg`, for a right-handed setup.
+
+**Right controller**
+
+| Input | In the game | In menus |
+|---|---|---|
+| Trigger | fire | confirm |
+| Thumbstick left/right | turn | navigate |
+| Thumbstick click | open the menu | |
+| Trackpad, upper half (press) | next weapon | |
+| Trackpad, lower half (press) | previous weapon | |
+| B | use | confirm |
+| A | not assigned | back |
+| Grip (squeeze) | jump | |
+
+**Left controller**
+
+| Input | In the game | In menus |
+|---|---|---|
+| Thumbstick | move and strafe | navigate |
+| Trigger | alternate fire | |
+| Grip (squeeze) | crouch while held | |
+| Thumbstick click, A | use inventory item | |
+| B | automap | |
+
+The weapon follows the right hand. Running has no button in this layout.
+
+## Changing the layout
+
+There are two layers, and most changes only need the first.
+
+**1. Which action is on which key.** Edit `index_controller.cfg` and load it again with
+`+exec`, or use Options -> Customize Controls in the game. The file lists the key names;
+these are the ones the binding above produces:
+
+| Key name | Right hand | Key name | Left hand |
+|---|---|---|---|
+| `RTrigger` | trigger | `LTrigger` | trigger |
+| `Pad_A` | B button | `Pad_X` | A button |
+| `Pad_B` | A button | `Pad_Y` | B button |
+| `RShoulder` | grip | `LShoulder` | grip |
+| `RThumb` | thumbstick click | `LThumb` | thumbstick click |
+| `DPadUp` / `DPadDown` | trackpad upper / lower half | | |
+| `RStickLeft`, `RStickRight`, `RStickUp`, `RStickDown` | thumbstick pushed to the edge | `LStickLeft`, ... | thumbstick pushed to the edge |
+| `Pad_Start` | system button, if SteamVR passes it on | | |
+
+A line looks like `bind RShoulder +jump`. To free a key, use `unbind RShoulder`.
+
+Two things are fixed in the game and cannot be rebound: in menus `Pad_A` and the weapon
+hand trigger confirm and `Pad_B` goes back. That is why the binding sends the physical B
+button as `Pad_A`.
+
+**2. What the thumbsticks do as axes** (move, strafe, turn, dead zone, sensitivity).
+This cannot be set from a script. Use Options -> Controller Options -> OpenVR in the
+game. For Index controllers the entries named "Joystick" are the thumbsticks; the "Pad"
+entries have no effect. If you bind `RStickUp`/`RStickDown` to actions, set the vertical
+axis of the right stick to "None" there, otherwise it also moves you up and down while
+swimming or flying.
+
+**The grip as a shift key.** With `vr_alternate_mappings true` the weapon hand grip no
+longer sends `RShoulder`. Holding it switches the other buttons to a second set of keys
+(`Pad_A_Alt`, `RTrigger_Alt`, ...) and makes the thumbsticks send the mouse wheel and
+d-pad keys. That is the upstream default; `index_controller.cfg` turns it off so the grip
+can be a button of its own.
+
+**Which physical button is which key.** Only if the table above does not suit you: edit
+the binding in SteamVR's binding editor, or change `index_legacy.json`. With SteamVR
+running, the editor is also reachable in a browser at
+`http://127.0.0.1:27062/dashboard/controllerbinding.html`.
+
+## Brutal Doom
+
+Tested with Brutal Doom v21. Load the additional bindings on top:
+
+```
+./build/gzdoomvr -iwad /path/to/DOOM2.WAD -file /path/to/brutalv21.pk3 \
+    +exec "$PWD/linux/index_controller_brutaldoom.cfg"
+```
+
+| Input | Action |
+|---|---|
+| Right thumbstick forward | kick |
+| Right thumbstick back | reload |
+| Left trigger | dual wield / special action (replaces alternate fire) |
+| Left thumbstick click | throw grenade (replaces use inventory item) |
+
+These commands only exist while Brutal Doom is loaded. To get the plain layout back, load
+`index_controller.cfg` again.
+
+## 3D weapons and other mods
+
+Mods are loaded as in GZDoom, in the order given after `-file`. File names are case
+sensitive on Linux.
+
+- **3D weapon models.** Without a weapon pack the weapons are flat sprites. The packs
+  linked in the main README work: `HDVRweapons.zip` for the original games and
+  [br_vr](https://github.com/ajantaju/br_vr/releases) for Brutal Doom v21 (use the `pbr`
+  file, the `Quest` file is for the Quest port). Load the pack after the game mod:
+
+  ```
+  ./build/gzdoomvr -iwad /path/to/DOOM2.WAD -file /path/to/brutalv21.pk3 /path/to/BR_VR_pbr_RC2.zip
+  ```
+
+  If the weapon points too far up or down in your hand, change `openvr_weaponRotate`
+  (default -40) in the console. The `br_vr` README suggests -56 for the Vive.
+
+- **Mods that need a newer engine.** A mod made for GZDoom 4.14 stops the branch
+  `linux-openvr` with "requires a newer version of GZDoomVR". Use the branch
+  `linux-openvr-4.14` for those.
+
+- **Savegames** belong to the mod combination they were saved with. Loading one with
+  other mods fails with a message such as "Level was saved with a different number of ACS
+  modules".
+
+The weapon packs are not part of this repository. They come with their own credits and
+without a stated license.
+
+## The desktop window
+
+By default the window on the monitor shows both eyes side by side. `openvr_desktop_view 1`
+shows the left eye only, filling the window. On a wide monitor the image is cropped at
+the top and bottom. `index_controller.cfg` sets it to 1.
+
+## If something does not work
+
+- **The game is only on the monitor, not in the headset.** Open the console and type
+  `vr_mode 10`. Make sure SteamVR was running before you started the game.
+- **Buttons and sticks do nothing, or A and grip do the same.** The binding is not
+  selected. Run `select_binding.sh` again and look at its output.
+- **A menu entry cannot be confirmed with A.** That is intended in this layout: B and the
+  trigger confirm, A goes back.
+- **A fully pushed stick crouches or uses an item.** SteamVR's default binding is active,
+  see above.
+- **The start fails with `libzmusic.so.1`.** Copy the ZMusic library next to the
+  executable, see [LINUX.md](../LINUX.md).
+- **The game crashes.** It writes `gzdoomvr-crash.log` into the directory you started it
+  from. SteamVR's own logs are in `~/.local/share/Steam/logs/` (`vrserver.txt`,
+  `vrcompositor.txt`, `vrclient_gzdoomvr.txt`).
