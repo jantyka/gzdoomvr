@@ -91,7 +91,8 @@ None of these are part of this repository.
 ## Where this comes from
 
 GZDoomVR is a VR fork of [GZDoom](https://github.com/ZDoom/gzdoom), based on
-[gz3doom](http://rotatingpenguin.com/gz3doom/), [OpenVR Doom](https://github.com/Fishbiter/gz3doom)
+[gz3doom](https://github.com/cmbruns/gz3doom) by Christopher Bruns
+([project page](http://rotatingpenguin.com/gz3doom/)), [OpenVR Doom](https://github.com/Fishbiter/gz3doom)
 by Fishbiter and [QuestZDoom](https://github.com/DrBeef/QuestZDoom) by DrBeef, and
 maintained by hh79. The Linux work in this fork is a comparatively small addition on top
 of theirs.
