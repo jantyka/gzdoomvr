@@ -1534,6 +1534,11 @@ if(OPENVR_SHARED_LIBRARY)
 	install(PROGRAMS ${OPENVR_SHARED_LIBRARY} 
 		DESTINATION ${INSTALL_PATH}
 		COMPONENT "Shared_Libraries")
+	if(UNIX AND NOT APPLE)
+		# Linux: gl_openvr.cpp looks for the library in $PROGDIR first, so put it next to the binary
+		add_custom_command(TARGET zdoom POST_BUILD
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${OPENVR_SHARED_LIBRARY} $<TARGET_FILE_DIR:zdoom>)
+	endif()
 endif()
 
 source_group("Audio Files" REGULAR_EXPRESSION "^${CMAKE_CURRENT_SOURCE_DIR}/sound/.+")

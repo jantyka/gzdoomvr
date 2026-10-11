@@ -155,7 +155,12 @@ IF( NOT CMAKE_BUILD_TYPE )
 ENDIF()
 
 set( ZDOOM_OUTPUT_DIR ${CMAKE_BINARY_DIR} CACHE PATH "Directory where zdoom.pk3 and the executable will be created." )
-set( ZDOOM_EXE_NAME "gzdoom" CACHE FILEPATH "Name of the executable to create" )
+if( UNIX AND NOT APPLE )
+	# Linux: a distinct name keeps the binary apart from a regular GZDoom install and lets SteamVR tell the two apps apart
+	set( ZDOOM_EXE_NAME "gzdoomvr" CACHE FILEPATH "Name of the executable to create" )
+else()
+	set( ZDOOM_EXE_NAME "gzdoom" CACHE FILEPATH "Name of the executable to create" )
+endif()
 if( MSVC )
 	# Allow the user to use ZDOOM_OUTPUT_DIR as a single release point.
 	# Use zdoom, zdoomd, zdoom64, and zdoomd64 for the binary names
