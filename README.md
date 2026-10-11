@@ -29,22 +29,47 @@ Not tested in this fork:
 
 ## Controls
 
-With the setup from [linux/README.md](linux/README.md), for a right-handed player:
+With the setup from [linux/README.md](linux/README.md), for a right-handed player. The
+weapon follows the right hand.
 
-| | Right controller | Left controller |
-|---|---|---|
-| Thumbstick | turn | move and strafe |
-| Thumbstick click | | switch always-run on and off |
-| Trigger | fire, confirm in menus | alternate fire |
-| Grip (squeeze) | jump | crouch |
-| B | use, confirm in menus | automap |
-| A | back in menus | open the menu |
-| Trackpad up / down | next / previous weapon | |
+**Right controller**
 
-The weapon follows the right hand. Every assignment can be changed, either in the text
-file `linux/index_controller.cfg` or in the game under Options -> Customize Controls.
-There is an additional file for Brutal Doom (kick, reload, special action, grenades,
-offend).
+| Input | In the game | With Brutal Doom | In menus |
+|---|---|---|---|
+| Trigger | fire | fire | confirm |
+| Thumbstick left / right | turn | turn | navigate |
+| Thumbstick forward / back | | kick / reload | navigate |
+| Thumbstick click | | throw grenade | |
+| Trackpad, upper / lower half (press) | next / previous weapon | next / previous weapon | |
+| B | use | use | confirm |
+| A | | | back |
+| Grip (squeeze, from half force) | jump | jump | |
+
+**Left controller**
+
+| Input | In the game | With Brutal Doom | In menus |
+|---|---|---|---|
+| Thumbstick | move and strafe | move and strafe | navigate |
+| Thumbstick click | switch always-run on and off | switch always-run on and off | |
+| Trigger | alternate fire | dual wield / special action | |
+| Trackpad (press) | | offend | |
+| A | open the menu | open the menu | |
+| B | automap | automap | |
+| Grip (squeeze, from half force) | crouch while held | crouch while held | |
+
+Empty cells are not assigned. Using an inventory item has no button in this layout, and
+with Brutal Doom neither has alternate fire.
+
+Every assignment can be changed:
+
+- `linux/index_controller.cfg` holds the regular layout,
+  `linux/index_controller_brutaldoom.cfg` the Brutal Doom additions. Both are commented
+  text files with one line per key.
+- `linux/steamvr_bindings/index_legacy.json` decides how SteamVR reports the physical
+  buttons, for example that the grips click at half force.
+- Or use Options -> Customize Controls in the game.
+
+[linux/README.md](linux/README.md) explains the files and the key names.
 
 This layout differs from upstream's defaults. Those are still built in and apply when you
 do not use the files in `linux/`: the grip of the weapon hand then works as a shift key
@@ -79,7 +104,8 @@ Listed by upstream and not tried here:
 - [Laser Sight](https://github.com/mmaulwurff/laser-sight/releases) by mmaulwurff, for
   aiming
 
-None of these are part of this repository.
+None of these are part of this repository. `linux/get-tested-mods.sh` fetches the weapon
+packs and tells you where to get the others.
 
 ## Branches
 
@@ -97,6 +123,30 @@ GZDoomVR is a VR fork of [GZDoom](https://github.com/ZDoom/gzdoom), based on
 by Fishbiter and [QuestZDoom](https://github.com/DrBeef/QuestZDoom) by DrBeef, and
 maintained by hh79. The Linux work in this fork is a comparatively small addition on top
 of theirs.
+
+## Testers wanted
+
+This fork has been run on exactly one machine with one headset. If you try it, a short
+report helps a lot, whether it worked or not:
+[open an issue](https://github.com/jantyka/gzdoomvr/issues).
+
+Especially welcome:
+
+- **Steam Frame.** Nobody has tried this fork with a Steam Frame. It should show up as
+  just another SteamVR headset, but its controllers have no trackpad, and some input code
+  and the SteamVR binding in `linux/` are specific to Index controllers. Expect to need
+  your own key assignments; what you find out would let this fork ship a binding for it.
+- **Other headsets and controllers** on Linux: Quest via a streaming app, Vive, Reverb
+  and so on.
+- **Other distributions and GPUs**, in particular NVIDIA and Intel. Everything so far was
+  AMD on Arch Linux.
+- **Monado / Envision** with an OpenVR translation layer instead of SteamVR.
+
+Useful in a report: headset and controllers, distribution, GPU and driver version,
+SteamVR version, the branch or build you used, what works and what does not. If the game
+crashed, attach `gzdoomvr-crash.log` from the directory you started it in. For controller
+problems, the lines containing `gzdoomvr` from `~/.local/share/Steam/logs/vrserver.txt`
+show which binding SteamVR loaded.
 
 #
 Copyright (c) 1998-2024 ZDoom + GZDoom + GZDoomVR + QuestZDoom teams, and contributors
