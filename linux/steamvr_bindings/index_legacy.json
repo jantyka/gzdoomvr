@@ -116,10 +116,10 @@
 					"mode": "button",
 					"inputs": {
 						"click": {
-							"output": "/actions/legacy/in/right_a_press"
+							"output": "/actions/legacy/in/right_applicationmenu_press"
 						},
 						"touch": {
-							"output": "/actions/legacy/in/right_a_touch"
+							"output": "/actions/legacy/in/right_applicationmenu_touch"
 						}
 					}
 				},
@@ -128,10 +128,10 @@
 					"mode": "button",
 					"inputs": {
 						"click": {
-							"output": "/actions/legacy/in/right_applicationmenu_press"
+							"output": "/actions/legacy/in/right_a_press"
 						},
 						"touch": {
-							"output": "/actions/legacy/in/right_applicationmenu_touch"
+							"output": "/actions/legacy/in/right_a_touch"
 						}
 					}
 				},
@@ -180,12 +180,27 @@
 							"output": "/actions/legacy/in/right_axis0_touch"
 						}
 					}
+				},
+				{
+					"path": "/user/hand/right/input/trackpad",
+					"mode": "dpad",
+					"parameters": {
+						"sub_mode": "click"
+					},
+					"inputs": {
+						"north": {
+							"output": "/actions/legacy/in/right_axis2_press"
+						},
+						"south": {
+							"output": "/actions/legacy/in/right_axis3_press"
+						}
+					}
 				}
 			]
 		}
 	},
 	"controller_type": "knuckles",
-	"description": "Index controller binding for GZDoomVR on Linux: A and B arrive as separate buttons, the thumbstick does not click when pushed to the edge, the trackpad is unused.",
+	"description": "Index controller binding for GZDoomVR on Linux. Right hand: B arrives as A (confirm/use), A as application menu (back), trackpad up/down as axis 2/3 press. The thumbsticks do not click when pushed to the edge.",
 	"name": "GZDoomVR Linux - Index Controller",
 	"options": {},
 	"simulated_actions": []

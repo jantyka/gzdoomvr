@@ -1440,6 +1440,11 @@ namespace s3d
 		//System button (below A on Index controllers), bindable as Pad_Start. SteamVR may also open its dashboard on it.
 		HandleVRButton(*pPrimaryTrackedRemoteOld, *pPrimaryTrackedRemoteNew, openvr::vr::k_EButton_System, KEY_PAD_START,
 			true, true);
+		//Axis2/Axis3 presses, bindable as DPadUp/DPadDown. linux/steamvr_bindings/index_legacy.json sends the upper and lower half of the trackpad here.
+		HandleVRButton(*pPrimaryTrackedRemoteOld, *pPrimaryTrackedRemoteNew, openvr::vr::k_EButton_Axis2, KEY_PAD_DPAD_UP,
+			true, true);
+		HandleVRButton(*pPrimaryTrackedRemoteOld, *pPrimaryTrackedRemoteNew, openvr::vr::k_EButton_Axis3, KEY_PAD_DPAD_DOWN,
+			true, true);
 
 		//Dominant Hand - Secondary keys (grip pushed)
 		
