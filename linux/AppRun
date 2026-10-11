@@ -1,0 +1,8 @@
+#!/bin/sh
+# Entry point of the AppImage.
+#
+# The game looks for gzdoom.pk3 and libopenvr_api.so next to the path it was started with.
+# Started through the AppImage runtime, that path is the .AppImage file itself and the
+# game stops with "Cannot find gzdoom.pk3". So call the binary by its real path.
+here="$(dirname "$(readlink -f "$0")")"
+exec "$here/usr/bin/gzdoomvr" "$@"
