@@ -1504,6 +1504,17 @@ namespace s3d
 		pOffTracking->lastState = *pOffTrackedRemoteNew;
 	}
 
+	// The controller models are not in the global Models array, so FlushModels() does not reach them.
+	// Their buffers have to go while the GL context still exists: the map itself is a static and is
+	// only destroyed at exit(), after the context is gone.
+	void OpenVR_FlushControllerModels()
+	{
+		for (auto& mesh : controllerMeshes)
+		{
+			mesh.second.DestroyVertexBuffer();
+		}
+	}
+
 	VRControllerState_t& OpenVR_GetState(int hand)
 	{
 		int controller = openvr_rightHanded ? hand : 1 - hand;
