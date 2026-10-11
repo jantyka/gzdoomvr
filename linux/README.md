@@ -121,10 +121,12 @@ running, the editor is also reachable in a browser at
 
 ## Brutal Doom
 
-Tested with Brutal Doom v21. Load the additional bindings on top:
+Tested with Brutal Doom v21. Load the additional bindings after the regular ones. The
+Brutal Doom file only changes a few keys and expects the rest to be set already:
 
 ```
 ./build/gzdoomvr -iwad /path/to/DOOM2.WAD -file /path/to/brutalv21.pk3 \
+    +exec "$PWD/linux/index_controller.cfg" \
     +exec "$PWD/linux/index_controller_brutaldoom.cfg"
 ```
 
