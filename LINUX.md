@@ -7,7 +7,7 @@ There are no release builds yet. You build it from source as described below.
 
 - **Playing:** see [linux/README.md](linux/README.md) for the first start, the controller
   layout, how to change it, and mods.
-- **Windows:** not built and not tested from this fork. See [Windows](#windows).
+- **Windows:** compiles in CI, not runtime-tested. See [Windows](#windows).
 
 ## Branches
 
@@ -224,12 +224,15 @@ Not tested yet:
 
 ## Windows
 
-The Windows build of this fork has not been compiled or run. The Linux changes are
-separated with `#ifdef` or a build-time flag so that the Windows behavior should stay as
-it is, with one exception: the three crash fixes listed above are active on all
-platforms. There is no continuous integration for this fork yet, so "should" is all that
-can be said. Use the upstream releases on Windows:
-https://github.com/hh79/gzdoomvr/releases
+**Compiles in CI, not runtime-tested.** The workflow `.github/workflows/build.yml` builds
+this fork with Visual Studio 2022 on every push, next to the Linux build. That shows the
+Windows build still compiles and links. It has never been started: nobody has run a
+Windows build of this fork, with or without a headset.
+
+The Linux changes are separated with `#ifdef` or a build-time flag so that the Windows
+behavior should stay as it is, with one exception: the three crash fixes listed above
+are active on all platforms. This fork publishes no Windows builds. Use the upstream
+releases on Windows: https://github.com/hh79/gzdoomvr/releases
 
 ## License
 
