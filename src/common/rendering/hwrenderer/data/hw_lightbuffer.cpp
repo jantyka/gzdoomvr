@@ -52,7 +52,9 @@ FLightBuffer::FLightBuffer(int pipelineNbr):
 	{
 		mBufferType = false;
 		mBlockSize = screen->maxuniformblock / ELEMENT_SIZE;
-		mBlockAlign = screen->uniformblockalignment / ELEMENT_SIZE;
+		// Mesa (radeonsi) reports an offset alignment of 4 bytes, less than one element. Without the
+		// lower bound mBlockAlign is 0 and GetBinding() divides by zero as soon as a dynamic light is drawn.
+		mBlockAlign = screen->uniformblockalignment < ELEMENT_SIZE ? 1 : screen->uniformblockalignment / ELEMENT_SIZE;
 		mMaxUploadSize = (mBlockSize - mBlockAlign);
 
 		//mByteSize += screen->maxuniformblock;	// to avoid mapping beyond the end of the buffer. REMOVED this...This can try to allocate 100's of MB..
