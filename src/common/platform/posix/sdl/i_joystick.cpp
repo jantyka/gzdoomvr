@@ -38,6 +38,13 @@
 #include "m_joy.h"
 #include "keydef.h"
 
+#if defined(USE_OPENVR) && !defined(__APPLE__)
+// Linux/SDL: the OpenVR controller device is not an SDL joystick, it lives in i_openVR.cpp
+void I_ShutdownOpenVR();
+void I_OpenVRGetJoysticks(TArray<IJoystickConfig *> &sticks);
+void I_OpenVRAddAxes(float axes[NUM_JOYAXIS]);
+#endif
+
 #define DEFAULT_DEADZONE 0.25f;
 
 // Very small deadzone so that floating point magic doesn't happen
@@ -334,6 +341,9 @@ void I_ShutdownInput()
 		delete JoystickManager;
 		SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
 	}
+#if defined(USE_OPENVR) && !defined(__APPLE__)
+	I_ShutdownOpenVR();
+#endif
 }
 
 void I_GetJoysticks(TArray<IJoystickConfig *> &sticks)
@@ -342,6 +352,10 @@ void I_GetJoysticks(TArray<IJoystickConfig *> &sticks)
 
 	if (JoystickManager)
 		JoystickManager->GetDevices(sticks);
+#if defined(USE_OPENVR) && !defined(__APPLE__)
+	// Linux/SDL: list the OpenVR device in the controller options, like JoyDevices[INPUT_OpenVR] on Windows
+	I_OpenVRGetJoysticks(sticks);
+#endif
 }
 
 void I_GetAxes(float axes[NUM_JOYAXIS])
@@ -354,6 +368,13 @@ void I_GetAxes(float axes[NUM_JOYAXIS])
 	{
 		JoystickManager->AddAxes(axes);
 	}
+#if defined(USE_OPENVR) && !defined(__APPLE__)
+	// Linux/SDL: the VR controller sticks must work even if SDL found no joystick at all
+	if (use_joystick)
+	{
+		I_OpenVRAddAxes(axes);
+	}
+#endif
 }
 
 void I_ProcessJoysticks()

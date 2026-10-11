@@ -460,7 +460,7 @@ endif()
 # Start defining source files for ZDoom
 set( PLAT_WIN32_SOURCES
 	win32/i_steam.cpp
-	win32/i_openVR.cpp
+	i_openVR.cpp
 	common/platform/win32/hardware.cpp
 	common/platform/win32/i_input.cpp
 	common/platform/win32/i_keyboard.cpp
@@ -550,6 +550,12 @@ else()
 	set( SYSTEM_SOURCES_DIR common/platform/posix common/platform/posix/sdl )
 	set( SYSTEM_SOURCES ${PLAT_POSIX_SOURCES} ${PLAT_SDL_SOURCES} ${PLAT_UNIX_SOURCES} )
 	set( OTHER_SYSTEM_SOURCES ${PLAT_WIN32_SOURCES} ${PLAT_OSX_SOURCES} ${PLAT_COCOA_SOURCES} )
+
+	if( ENABLE_OPENVR )
+		# Linux/SDL: the OpenVR joystick device is shared with the Windows backend
+		list( REMOVE_ITEM OTHER_SYSTEM_SOURCES i_openVR.cpp )
+		list( APPEND SYSTEM_SOURCES i_openVR.cpp )
+	endif()
 
 	if ( SYSTEMINSTALL )
 		add_definitions( -DPROGDIR="${CMAKE_INSTALL_PREFIX}/${INSTALL_PK3_PATH}" )
