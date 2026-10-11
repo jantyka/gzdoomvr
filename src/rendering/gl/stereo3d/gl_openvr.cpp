@@ -1635,6 +1635,12 @@ namespace s3d
 		);
 
 		player_t* player = r_viewpoint.camera ? r_viewpoint.camera->player : nullptr;
+		// A player can be without a body for some frames, e.g. after a savegame failed to load. Everything
+		// below goes through player->mo, so treat that case like having no player.
+		if (player != nullptr && player->mo == nullptr)
+		{
+			player = nullptr;
+		}
 
 		TrackedDevicePose_t& hmdPose0 = poses[k_unTrackedDeviceIndex_Hmd];
 
