@@ -1,0 +1,121 @@
+name: AppImage
+
+# Builds an AppImage of the Linux port and offers it as a workflow artifact. Nothing is
+# published as a release from here.
+#
+# Built on Ubuntu 22.04 so that the result also runs on distributions with an older glibc.
+# The AppImage contains the game, its own data files, OpenVR, ZMusic, SDL2 and OpenAL. It
+# does not contain game data (DOOM.WAD, DOOM2.WAD), mods, or SteamVR.
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'gvr*-linux*'
+
+env:
+  OPENVR_TAG: v2.15.6
+  ZMUSIC_TAG: 1.3.0
+  # linuxdeploy is a prebuilt tool. Pin the release and check its SHA-256 (the digest that
+  # GitHub lists for this release asset).
+  LINUXDEPLOY_TAG: 1-alpha-20251107-1
+  LINUXDEPLOY_SHA256: c20cd71e3a4e3b80c3483cef793cda3f4e990aca14014d23c544ca3ce1270b4d
+
+jobs:
+  appimage:
+    name: AppImage (x86_64)
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The version shown by the game comes from "git describe", which needs the tags.
+          fetch-depth: 0
+
+      - name: Install packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build libsdl2-dev libopenal-dev libvpx-dev \
+            libbz2-dev libgtk-3-dev libwebp-dev zlib1g-dev imagemagick file
+
+      - name: Get the OpenVR SDK
+        run: |
+          git clone --depth 1 --branch "$OPENVR_TAG" --filter=blob:none --sparse \
+            https://github.com/ValveSoftware/openvr "$RUNNER_TEMP/openvr"
+          git -C "$RUNNER_TEMP/openvr" sparse-checkout set headers bin/linux64 lib/linux64
+
+      - name: Build ZMusic
+        run: |
+          git clone --depth 1 --branch "$ZMUSIC_TAG" https://github.com/ZDoom/ZMusic "$RUNNER_TEMP/zmusic-src"
+          cmake -S "$RUNNER_TEMP/zmusic-src" -B "$RUNNER_TEMP/zmusic-build" -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$RUNNER_TEMP/zmusic"
+          cmake --build "$RUNNER_TEMP/zmusic-build"
+          cmake --install "$RUNNER_TEMP/zmusic-build"
+
+      - name: Build
+        run: |
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DOPENVR_SDK_PATH="$RUNNER_TEMP/openvr" \
+            -DZMUSIC_INCLUDE_DIR="$RUNNER_TEMP/zmusic/include" \
+            -DZMUSIC_LIBRARIES="$RUNNER_TEMP/zmusic/lib/libzmusic.so"
+          cmake --build build
+
+      - name: Assemble the AppDir
+        run: |
+          mkdir -p AppDir/usr/bin AppDir/usr/share/gzdoomvr AppDir/usr/share/doc/gzdoomvr
+          # The game looks for its data files and for libopenvr_api.so next to the binary.
+          cp build/gzdoomvr build/*.pk3 build/libopenvr_api.so AppDir/usr/bin/
+          cp -r build/soundfonts build/fm_banks AppDir/usr/bin/
+          cp -r linux AppDir/usr/share/gzdoomvr/
+          cp LICENSE README.md LINUX.md AppDir/usr/share/doc/gzdoomvr/
+          cp -r docs/licenses AppDir/usr/share/doc/gzdoomvr/
+          # The repository only has the icon as .ico; take its largest image.
+          convert src/win32/icon1.ico icon.png
+          largest="$(ls -S icon*.png | head -n 1)"
+          convert "$largest" -resize 256x256 -background none -gravity center -extent 256x256 gzdoomvr.png
+
+      - name: Build the AppImage
+        env:
+          # No FUSE on the runner.
+          APPIMAGE_EXTRACT_AND_RUN: 1
+        run: |
+          curl --fail --location --silent --show-error --output linuxdeploy \
+            "https://github.com/linuxdeploy/linuxdeploy/releases/download/$LINUXDEPLOY_TAG/linuxdeploy-x86_64.AppImage"
+          echo "$LINUXDEPLOY_SHA256  linuxdeploy" | sha256sum --check
+          chmod +x linuxdeploy
+          version="$(git describe --tags --always)"
+          export LINUXDEPLOY_OUTPUT_VERSION="$version"
+          export LD_LIBRARY_PATH="$RUNNER_TEMP/zmusic/lib"
+          # OpenAL is loaded at run time by name, so it has to be named here to be bundled.
+          ./linuxdeploy --appdir AppDir \
+            --executable AppDir/usr/bin/gzdoomvr \
+            --library "$RUNNER_TEMP/zmusic/lib/libzmusic.so.1" \
+            --library /usr/lib/x86_64-linux-gnu/libopenal.so.1 \
+            --desktop-file linux/gzdoomvr.desktop \
+            --icon-file gzdoomvr.png \
+            --output appimage
+          ls -la *.AppImage
+
+      - name: Check the result
+        run: |
+          image="$(ls GZDoomVR*.AppImage)"
+          chmod +x "$image"
+          "./$image" --appimage-extract > /dev/null
+          echo "Libraries the bundled binary cannot resolve:"
+          if LD_LIBRARY_PATH= ldd squashfs-root/usr/bin/gzdoomvr | grep "not found"; then
+            exit 1
+          fi
+          echo "(none)"
+          test -f squashfs-root/usr/bin/gzdoom.pk3
+          test -f squashfs-root/usr/bin/libopenvr_api.so
+          test -f squashfs-root/usr/share/gzdoomvr/linux/index_controller.cfg
+          ls squashfs-root/usr/lib | sort | tr '\n' ' '
+          echo
+          sha256sum "$image" | tee "$image.sha256"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GZDoomVR-AppImage
+          path: |
+            GZDoomVR*.AppImage
+            GZDoomVR*.AppImage.sha256
+          if-no-files-found: error
