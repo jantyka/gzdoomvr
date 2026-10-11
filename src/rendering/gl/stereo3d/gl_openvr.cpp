@@ -76,6 +76,9 @@ namespace openvr {
 #include "openvr.h"
 }
 
+// Linux: guards the layout fix in openvr_include.h, the runtime expects the size from openvr.h
+static_assert(sizeof(openvr::VRControllerState_t) == sizeof(openvr::vr::VRControllerState_t), "VRControllerState_t layout mismatch");
+
 void I_StartupOpenVR();
 double P_XYMovement(AActor* mo, DVector2 scroll);
 float I_OpenVRGetYaw();
@@ -1563,7 +1566,8 @@ namespace s3d
 						controllers[role].model = &controllerMeshes[model_name];
 					}
 					VRControllerState_t newState;
-					vrSystem->GetControllerState(i, &newState, sizeof(newState));
+					// Linux: the function table is declared with the C header's struct, see openvr_include.h
+					vrSystem->GetControllerState(i, (VRControllerState_capi_t*)&newState, sizeof(newState));
 
 					if (role == 0)
 						leftTrackedRemoteStateNew = newState;
