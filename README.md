@@ -24,8 +24,8 @@ Not tested in this fork:
 - **Meta Quest and other headsets.** Upstream is developed and tested on the Quest with
   Virtual Desktop on Windows. Nothing in this fork was tried with a Quest.
 - **Controllers other than the Index.**
-- **Windows.** This fork has not been built or run on Windows. Use the
-  [upstream releases](https://github.com/hh79/gzdoomvr/releases) there.
+- **Windows.** The Windows build of this fork compiles in CI, but it has never been run.
+  Use the [upstream releases](https://github.com/hh79/gzdoomvr/releases) there.
 
 ## Controls
 
