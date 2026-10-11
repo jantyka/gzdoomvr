@@ -1,70 +1,100 @@
-# GZDoomVR 
+# GZDoomVR for Linux
 
-> **Linux:** this fork builds and runs natively on Linux with SteamVR. See [LINUX.md](LINUX.md) for building
-> and [linux/README.md](linux/README.md) for the controller setup with Valve Index controllers.
-This is a VR fork of GZDoom based on gz3doom http://rotatingpenguin.com/gz3doom/, OpenVR Doom https://github.com/Fishbiter/gz3doom and QuestZDoom https://github.com/DrBeef/QuestZDoom.
+Classic Doom in VR, running natively on Linux with SteamVR.
 
-The build has been developed and tested on the Meta Quest using Virtual Desktop. However, it should also work with other VR setups that are compatible with the OpenVR API.
+This is a fork of [GZDoomVR by hh79](https://github.com/hh79/gzdoomvr). Upstream is
+developed for Windows and provides Windows builds only. This fork adds what is needed to
+build and run it on Linux, a controller setup for Valve Index controllers, and fixes for
+crashes found along the way.
 
-This version enables OpenVR controller input customization, allowing you to define controls according to your preference. By default, one hand (dominant) is tracked for weapon handling. Additionally, it includes a modified weapon pack created by Fishbiter.
+- **Building:** [LINUX.md](LINUX.md)
+- **Playing, controller layout, mods:** [linux/README.md](linux/README.md)
 
-## Controller Info
+There are no ready-made builds yet, you build it from source. No game data is included;
+you need your own `DOOM.WAD` or `DOOM2.WAD`.
 
-### Meta Quest Controllers
-Default controller bindings are provided. By default, secondary mappings are enabled when the dominant grip is pushed. You can disable this, but remember to provide your own binding to open the main menu.
+## What it was tested with
 
-### Index Controllers
-To fully utilize your Index Controllers, select the Community Binding 'Index Controller Bindings' by gameflorist in SteamVR. This configuration provides the maximum number of buttons available for binding in GZDoom.
+Arch Linux, GNOME on Wayland, an AMD Radeon RX 7900 XT with Mesa, SteamVR for Linux and a
+**Valve Index with Index controllers**. Details and the list of what was and was not
+tested are in [LINUX.md](LINUX.md#tested-system).
 
+Not tested in this fork:
 
-## Default Controls
+- **Meta Quest and other headsets.** Upstream is developed and tested on the Quest with
+  Virtual Desktop on Windows. Nothing in this fork was tried with a Quest.
+- **Controllers other than the Index.**
+- **Windows.** This fork has not been built or run on Windows. Use the
+  [upstream releases](https://github.com/hh79/gzdoomvr/releases) there.
 
-You can switch your dominant hand using the "Handness" option.
+## Controls
 
-### Primary Mappings
+With the setup from [linux/README.md](linux/README.md), for a right-handed player:
 
-* **Dominant-Hand A Button** - Open Door / Switch
-* **Dominant-Hand B Button** - Jump
-* **Off-Hand X(A) Button** - Item use
-* **Off-Hand Y(B) Button** - Toggle AutoMap
+| | Right controller | Left controller |
+|---|---|---|
+| Thumbstick | turn | move and strafe |
+| Thumbstick click | open the menu | use inventory item |
+| Trigger | fire, confirm in menus | alternate fire |
+| Grip (squeeze) | jump | crouch |
+| B | use, confirm in menus | automap |
+| A | back in menus | use inventory item |
+| Trackpad up / down | next / previous weapon | |
 
-* **Dominant-Hand Controller** - Weapon orientation
-* **Dominant-Hand Trigger** - Fire Weapon
-* **Dominant-Hand Grip Button** - Enables secondary mappings
-* **Dominant-Hand Thumbstick click** - Crouch
+The weapon follows the right hand. Every assignment can be changed, either in the text
+file `linux/index_controller.cfg` or in the game under Options -> Customize Controls.
+There is an additional file for Brutal Doom (kick, reload, special action, grenades).
 
-* **Off-Hand Controller** - Direction of movement (or if configured settings HMD direction is used)
-* **Off-Hand Trigger** - Alternate fire weapon
-* **Off-Hand Grip Button** - Run
-* **Off-Hand Thumbstick click** - Item use
+This layout differs from upstream's defaults. Those are still built in and apply when you
+do not use the files in `linux/`: the grip of the weapon hand then works as a shift key
+for a second set of bindings. They are described in the
+[upstream README](https://github.com/hh79/gzdoomvr#default-controls). With Index
+controllers they need a matching SteamVR binding as well, because SteamVR's own default
+reports the A buttons as grip.
 
-### Secondary Mappings
-
-* **Dominant-Hand A Button** - Open Main Menu
-* **Dominant-Hand B Button** - Crouch
-* **Off-Hand Y(B) Button** - Pause
-
-* **Dominant-Hand Trigger** - Alternate fire weapon 
-* **Dominant-Hand Thumbstick** - up/down Weapon change
-
-* **Off-Hand Thumbstick** - up/down Item change
-  
 ## Mods
-There are some optional mods tested for using with this fork
 
-https://github.com/hh79/gz3doom/files/4378108/HDVRweapons.zip HD weapon pack made by ajantaju
+Mods are loaded as in GZDoom with `-file`. Tested in this fork:
 
-https://github.com/ajantaju/br_vr weapon pack made for Brutal Doom
+- [Brutal Doom](https://www.moddb.com/mods/brutal-doom) v21, with Doom and Doom 2
+- [br_vr](https://github.com/ajantaju/br_vr/releases), 3D weapon models for Brutal Doom
+  v21 by ajantaju
+- LTP V7.0.1, liquid textures with real time reflections. It requires GZDoom 4.14 and
+  therefore the branch `linux-openvr-4.14`.
 
-https://github.com/dxt121730/BD64Weapons weapon pack for Brutal Doom 64 by dxt121730
+Started once without problems, but not looked at closely:
 
-https://github.com/iAmErmac/Virtual-Tactical-Vest adds a virtual vest with weapon slots by iAmErmac
+- [HDVRweapons.zip](https://github.com/hh79/gz3doom/files/4378108/HDVRweapons.zip), 3D
+  weapon models for the original games by ajantaju
 
-https://www.moddb.com/downloads/doom-neural-upscale-2x texture upscale mod
+Listed by upstream and not tried here:
 
-https://forum.zdoom.org/download/file.php?id=30459&sid=df63736751c12c3ebb76230d1dc86543 blood color fixer mod
+- [BD64Weapons](https://github.com/dxt121730/BD64Weapons), weapon pack for Brutal Doom 64
+  by dxt121730
+- [Virtual Tactical Vest](https://github.com/iAmErmac/Virtual-Tactical-Vest), a virtual
+  vest with weapon slots by iAmErmac
+- [Doom Neural Upscale 2X](https://www.moddb.com/downloads/doom-neural-upscale-2x),
+  texture upscale
+- [Laser Sight](https://github.com/mmaulwurff/laser-sight/releases) by mmaulwurff, for
+  aiming
 
-https://github.com/mmaulwurff/laser-sight/releases laser sight mod, you need this for aiming (already included)
+None of these are part of this repository.
+
+## Branches
+
+| Branch | Based on |
+|---|---|
+| `linux-openvr-4.14` | upstream `openvr_controller` with GZDoom 4.14.2. Recommended. |
+| `linux-openvr` | the upstream release `gvr4.13.2.2` with GZDoom 4.13.2 |
+| `openvr_controller` | unchanged upstream |
+
+## Where this comes from
+
+GZDoomVR is a VR fork of [GZDoom](https://github.com/ZDoom/gzdoom), based on
+[gz3doom](http://rotatingpenguin.com/gz3doom/), [OpenVR Doom](https://github.com/Fishbiter/gz3doom)
+by Fishbiter and [QuestZDoom](https://github.com/DrBeef/QuestZDoom) by DrBeef, and
+maintained by hh79. The Linux work in this fork is a comparatively small addition on top
+of theirs.
 
 #
 Copyright (c) 1998-2024 ZDoom + GZDoom + GZDoomVR + QuestZDoom teams, and contributors
