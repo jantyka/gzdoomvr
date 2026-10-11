@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=GZDoomVR
+GenericName=Doom in VR
+Comment=Classic Doom in VR with SteamVR. Needs your own game data (DOOM.WAD, DOOM2.WAD).
+Exec=gzdoomvr
+Icon=gzdoomvr
+Categories=Game;
+Terminal=false
