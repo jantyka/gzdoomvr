@@ -1,6 +1,13 @@
+#ifdef _WIN32
 #include <Windows.h>
+#endif
 #include "d_event.h"
+#ifdef _WIN32
 #include "i_input.h"
+#else
+// Linux/SDL: the Win32 input header does not exist there, IJoystickConfig comes from m_joy.h
+#include "m_joy.h"
+#endif
 #include "openvr_include.h"
 #include "menu.h"
 
@@ -282,6 +289,7 @@ public:
 	int axisTrigger = -1;
 };
 
+#ifdef _WIN32
 class FOpenVRJoystickManager : public FJoystickCollection
 {
 public:
@@ -335,3 +343,50 @@ float I_OpenVRGetYaw()
 	}
 	return 0;
 }
+
+#else
+
+// Linux/SDL: the SDL backend has no JoyDevices array and no FJoystickCollection, so the
+// device is kept here and hooked into I_GetJoysticks()/I_GetAxes() in posix/sdl/i_joystick.cpp.
+static FOpenVRJoystick *OpenVRJoystick;
+
+void I_StartupOpenVR()
+{
+	if (OpenVRJoystick == nullptr)
+	{
+		OpenVRJoystick = new FOpenVRJoystick;
+		event_t ev = { EV_DeviceChange };
+		D_PostEvent(&ev);
+	}
+}
+
+// Linux/SDL: deleting the device is what saves its axis configuration, like the
+// JoyDevices cleanup in the Win32 I_ShutdownInput() does.
+void I_ShutdownOpenVR()
+{
+	delete OpenVRJoystick;
+	OpenVRJoystick = nullptr;
+}
+
+float I_OpenVRGetYaw()
+{
+	return OpenVRJoystick != nullptr ? OpenVRJoystick->GetYaw() : 0;
+}
+
+void I_OpenVRGetJoysticks(TArray<IJoystickConfig *> &sticks)
+{
+	if (OpenVRJoystick != nullptr)
+	{
+		sticks.Push(OpenVRJoystick);
+	}
+}
+
+void I_OpenVRAddAxes(float axes[NUM_JOYAXIS])
+{
+	if (OpenVRJoystick != nullptr)
+	{
+		OpenVRJoystick->AddAxes(axes);
+	}
+}
+
+#endif
