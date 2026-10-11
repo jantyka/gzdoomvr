@@ -34,16 +34,17 @@ With the setup from [linux/README.md](linux/README.md), for a right-handed playe
 | | Right controller | Left controller |
 |---|---|---|
 | Thumbstick | turn | move and strafe |
-| Thumbstick click | open the menu | use inventory item |
+| Thumbstick click | | switch always-run on and off |
 | Trigger | fire, confirm in menus | alternate fire |
 | Grip (squeeze) | jump | crouch |
 | B | use, confirm in menus | automap |
-| A | back in menus | use inventory item |
+| A | back in menus | open the menu |
 | Trackpad up / down | next / previous weapon | |
 
 The weapon follows the right hand. Every assignment can be changed, either in the text
 file `linux/index_controller.cfg` or in the game under Options -> Customize Controls.
-There is an additional file for Brutal Doom (kick, reload, special action, grenades).
+There is an additional file for Brutal Doom (kick, reload, special action, grenades,
+offend).
 
 This layout differs from upstream's defaults. Those are still built in and apply when you
 do not use the files in `linux/`: the grip of the weapon hand then works as a shift key
