@@ -1,0 +1,94 @@
+name: Build
+
+# Compile check for Linux and Windows. Nothing is run or tested here, and no VR hardware
+# is involved: a green Windows job means that the Windows build still compiles and links,
+# not that it works.
+
+on:
+  push:
+    branches:
+      - 'linux-openvr*'
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # The repository has no OpenVR headers of its own. Keep this at the SDK version the port
+  # was developed with; header and library must come from the same version.
+  OPENVR_TAG: v2.15.6
+  ZMUSIC_TAG: 1.3.0
+
+jobs:
+  linux:
+    name: Linux (GCC)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build libsdl2-dev libopenal-dev libvpx-dev \
+            libbz2-dev libgtk-3-dev libwebp-dev zlib1g-dev
+
+      - name: Get the OpenVR SDK
+        run: |
+          git clone --depth 1 --branch "$OPENVR_TAG" --filter=blob:none --sparse \
+            https://github.com/ValveSoftware/openvr "$RUNNER_TEMP/openvr"
+          git -C "$RUNNER_TEMP/openvr" sparse-checkout set headers bin/linux64 lib/linux64
+
+      - name: Build ZMusic
+        run: |
+          git clone --depth 1 --branch "$ZMUSIC_TAG" https://github.com/ZDoom/ZMusic "$RUNNER_TEMP/zmusic-src"
+          cmake -S "$RUNNER_TEMP/zmusic-src" -B "$RUNNER_TEMP/zmusic-build" -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$RUNNER_TEMP/zmusic"
+          cmake --build "$RUNNER_TEMP/zmusic-build"
+          cmake --install "$RUNNER_TEMP/zmusic-build"
+
+      - name: Configure
+        run: |
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DOPENVR_SDK_PATH="$RUNNER_TEMP/openvr" \
+            -DZMUSIC_INCLUDE_DIR="$RUNNER_TEMP/zmusic/include" \
+            -DZMUSIC_LIBRARIES="$RUNNER_TEMP/zmusic/lib/libzmusic.so"
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Check the result
+        run: |
+          test -x build/gzdoomvr
+          test -f build/libopenvr_api.so
+          test -f build/gzdoom.pk3
+
+  windows:
+    name: Windows (MSVC, compile check only)
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get the OpenVR SDK
+        shell: bash
+        run: |
+          git clone --depth 1 --branch "$OPENVR_TAG" --filter=blob:none --sparse \
+            https://github.com/ValveSoftware/openvr "$RUNNER_TEMP/openvr"
+          git -C "$RUNNER_TEMP/openvr" sparse-checkout set headers bin/win64 lib/win64
+
+      # ZMusic and libvpx for Windows are part of the repository (bin/windows).
+      - name: Configure
+        shell: bash
+        run: |
+          cmake -B build -A x64 -DOPENVR_SDK_PATH="$(cygpath -m "$RUNNER_TEMP")/openvr"
+
+      - name: Build
+        shell: bash
+        run: cmake --build build --config Release --parallel 4
+
+      - name: Check the result
+        shell: bash
+        run: |
+          ls -la build/Release
+          test -f build/Release/gzdoom.exe
