@@ -1276,6 +1276,20 @@ namespace s3d
 		Joy_GenerateUIButtonEvents((lastState.ulButtonPressed & (1LL << vrindex)) ? 1 : 0, (newState.ulButtonPressed & (1LL << vrindex)) ? 1 : 0, 1, &doomkey);
 	}
 
+	// keys: left, right, down, up
+	static int GetVRStickKeyState(VRControllerState_t& state, int vrAxis, float threshold, bool enabled)
+	{
+		if (!enabled) return 0;
+		const auto& axis = state.rAxis[vrAxis];
+		return (axis.x < -threshold ? 1 : 0) | (axis.x > threshold ? 2 : 0) | (axis.y < -threshold ? 4 : 0) | (axis.y > threshold ? 8 : 0);
+	}
+
+	static void HandleVRStickKeys(VRControllerState_t& lastState, VRControllerState_t& newState, int vrAxis, float threshold,
+		bool enabledOld, bool enabledNew, const int* keys)
+	{
+		Joy_GenerateButtonEvents(GetVRStickKeyState(lastState, vrAxis, threshold, enabledOld), GetVRStickKeyState(newState, vrAxis, threshold, enabledNew), 4, keys);
+	}
+
 
 	VRControllerState_t leftTrackedRemoteStateNew;
 	VRControllerState_t rightTrackedRemoteStateNew;
@@ -1300,57 +1314,77 @@ namespace s3d
 			(pPrimaryTrackedRemoteNew->ulButtonPressed & ButtonMaskFromId(openvr::vr::k_EButton_Grip)) : false;
 
 		auto threshold = 0.9f;
+		// Index controllers report no axis of type joystick (trackpad, trigger, trigger), their
+		// thumbstick arrives on the trackpad axis. Without the fallback the menu read rAxis[-1].
+		int stickAxis = axisJoystick != -1 ? axisJoystick : axisTrackpad;
+		if (stickAxis != -1 && CurrentMenu != nullptr && menuactive != MENU_Off && menuactive != MENU_WaitKey)
+		{
+			HandleUIVRAxes(*pPrimaryTrackedRemoteOld, *pPrimaryTrackedRemoteNew, stickAxis, GK_LEFT, GK_RIGHT, GK_DOWN, GK_UP);
+			HandleUIVRAxes(*pSecondaryTrackedRemoteOld, *pSecondaryTrackedRemoteNew, stickAxis, GK_LEFT, GK_RIGHT, GK_DOWN, GK_UP);
+		}
 		if (CurrentMenu != nullptr && menuactive != MENU_Off && menuactive != MENU_WaitKey)
 		{
-			HandleUIVRAxes(*pPrimaryTrackedRemoteOld, *pPrimaryTrackedRemoteNew, axisJoystick, GK_LEFT, GK_RIGHT, GK_DOWN, GK_UP);
-			HandleUIVRAxes(*pSecondaryTrackedRemoteOld, *pSecondaryTrackedRemoteNew, axisJoystick, GK_LEFT, GK_RIGHT, GK_DOWN, GK_UP);
+			// The weapon hand trigger confirms in menus. SteamVR's default legacy binding reports the
+			// A button of Index controllers as grip, so KEY_PAD_A never arrives there.
+			HandleUIVRButton(*pPrimaryTrackedRemoteOld, *pPrimaryTrackedRemoteNew, openvr::vr::k_EButton_Axis1, GK_RETURN);
 		}
 
 	
-		if (axisJoystick != -1)
+		if (stickAxis != -1)
 		{
 			//Default this is Weapon Chooser - This _could_ be remapped
 			// 
 			Joy_GenerateButtonEvents(
-				(pPrimaryTrackedRemoteOld->rAxis[axisJoystick].y < -threshold && dominantGripPushedOld ? 1 : 0),
-				(pPrimaryTrackedRemoteNew->rAxis[axisJoystick].y < -threshold && dominantGripPushedNew ? 1 : 0),
+				(pPrimaryTrackedRemoteOld->rAxis[stickAxis].y < -threshold && dominantGripPushedOld ? 1 : 0),
+				(pPrimaryTrackedRemoteNew->rAxis[stickAxis].y < -threshold && dominantGripPushedNew ? 1 : 0),
 				1, KEY_MWHEELDOWN);
 
 			////Default this is Weapon Chooser - This _could_ be remapped
 			Joy_GenerateButtonEvents(
-				(pPrimaryTrackedRemoteOld->rAxis[axisJoystick].y > threshold && dominantGripPushedOld ? 1 : 0),
-				(pPrimaryTrackedRemoteNew->rAxis[axisJoystick].y > threshold && dominantGripPushedNew ? 1 : 0),
+				(pPrimaryTrackedRemoteOld->rAxis[stickAxis].y > threshold && dominantGripPushedOld ? 1 : 0),
+				(pPrimaryTrackedRemoteNew->rAxis[stickAxis].y > threshold && dominantGripPushedNew ? 1 : 0),
 				1, KEY_MWHEELUP);
 
 			Joy_GenerateButtonEvents(
-				(pPrimaryTrackedRemoteOld->rAxis[axisJoystick].x < -threshold && dominantGripPushedOld && !vr_snap_turn ? 1 : 0),
-				(pPrimaryTrackedRemoteNew->rAxis[axisJoystick].x < -threshold && dominantGripPushedNew && !vr_snap_turn ? 1 : 0),
+				(pPrimaryTrackedRemoteOld->rAxis[stickAxis].x < -threshold && dominantGripPushedOld && !vr_snap_turn ? 1 : 0),
+				(pPrimaryTrackedRemoteNew->rAxis[stickAxis].x < -threshold && dominantGripPushedNew && !vr_snap_turn ? 1 : 0),
 				1, KEY_MWHEELLEFT);
 
 			Joy_GenerateButtonEvents(
-				(pPrimaryTrackedRemoteOld->rAxis[axisJoystick].x > threshold && dominantGripPushedOld && !vr_snap_turn ? 1 : 0),
-				(pPrimaryTrackedRemoteNew->rAxis[axisJoystick].x > threshold && dominantGripPushedNew && !vr_snap_turn ? 1 : 0),
+				(pPrimaryTrackedRemoteOld->rAxis[stickAxis].x > threshold && dominantGripPushedOld && !vr_snap_turn ? 1 : 0),
+				(pPrimaryTrackedRemoteNew->rAxis[stickAxis].x > threshold && dominantGripPushedNew && !vr_snap_turn ? 1 : 0),
 				1, KEY_MWHEELRIGHT);
 
 			Joy_GenerateButtonEvents(
-				(pSecondaryTrackedRemoteOld->rAxis[axisJoystick].y < -threshold && dominantGripPushedOld ? 1 : 0),
-				(pSecondaryTrackedRemoteNew->rAxis[axisJoystick].y < -threshold && dominantGripPushedNew ? 1 : 0),
+				(pSecondaryTrackedRemoteOld->rAxis[stickAxis].y < -threshold && dominantGripPushedOld ? 1 : 0),
+				(pSecondaryTrackedRemoteNew->rAxis[stickAxis].y < -threshold && dominantGripPushedNew ? 1 : 0),
 				1, KEY_PAD_DPAD_DOWN);
 
 			Joy_GenerateButtonEvents(
-				(pSecondaryTrackedRemoteOld->rAxis[axisJoystick].y > threshold && dominantGripPushedOld ? 1 : 0),
-				(pSecondaryTrackedRemoteNew->rAxis[axisJoystick].y > threshold && dominantGripPushedNew ? 1 : 0),
+				(pSecondaryTrackedRemoteOld->rAxis[stickAxis].y > threshold && dominantGripPushedOld ? 1 : 0),
+				(pSecondaryTrackedRemoteNew->rAxis[stickAxis].y > threshold && dominantGripPushedNew ? 1 : 0),
 				1, KEY_PAD_DPAD_UP);
 
 			Joy_GenerateButtonEvents(
-				(pSecondaryTrackedRemoteOld->rAxis[axisJoystick].x < -threshold && dominantGripPushedOld && !vr_snap_turn ? 1 : 0),
-				(pSecondaryTrackedRemoteNew->rAxis[axisJoystick].x < -threshold && dominantGripPushedNew && !vr_snap_turn ? 1 : 0),
+				(pSecondaryTrackedRemoteOld->rAxis[stickAxis].x < -threshold && dominantGripPushedOld && !vr_snap_turn ? 1 : 0),
+				(pSecondaryTrackedRemoteNew->rAxis[stickAxis].x < -threshold && dominantGripPushedNew && !vr_snap_turn ? 1 : 0),
 				1, KEY_PAD_DPAD_LEFT);
 
 			Joy_GenerateButtonEvents(
-				(pSecondaryTrackedRemoteOld->rAxis[axisJoystick].x > threshold && dominantGripPushedOld && !vr_snap_turn ? 1 : 0),
-				(pSecondaryTrackedRemoteNew->rAxis[axisJoystick].x > threshold && dominantGripPushedNew && !vr_snap_turn ? 1 : 0),
+				(pSecondaryTrackedRemoteOld->rAxis[stickAxis].x > threshold && dominantGripPushedOld && !vr_snap_turn ? 1 : 0),
+				(pSecondaryTrackedRemoteNew->rAxis[stickAxis].x > threshold && dominantGripPushedNew && !vr_snap_turn ? 1 : 0),
 				1, KEY_PAD_DPAD_RIGHT);
+
+			// Stick directions without grip arrive as the regular gamepad stick keys, so they can be bound
+			// under "Customize Controls" (e.g. RStickLeft/RStickRight to change weapons). Not while a menu
+			// is open: the menu treats the left stick keys as navigation and would move twice.
+			bool inMenu = CurrentMenu != nullptr && menuactive != MENU_Off;
+			static const int dominantStickKeys[] = { KEY_PAD_RTHUMB_LEFT, KEY_PAD_RTHUMB_RIGHT, KEY_PAD_RTHUMB_DOWN, KEY_PAD_RTHUMB_UP };
+			static const int offStickKeys[] = { KEY_PAD_LTHUMB_LEFT, KEY_PAD_LTHUMB_RIGHT, KEY_PAD_LTHUMB_DOWN, KEY_PAD_LTHUMB_UP };
+			HandleVRStickKeys(*pPrimaryTrackedRemoteOld, *pPrimaryTrackedRemoteNew, stickAxis, threshold,
+				!dominantGripPushedOld && !inMenu, !dominantGripPushedNew && !inMenu, dominantStickKeys);
+			HandleVRStickKeys(*pSecondaryTrackedRemoteOld, *pSecondaryTrackedRemoteNew, stickAxis, threshold,
+				!dominantGripPushedOld && !inMenu, !dominantGripPushedNew && !inMenu, offStickKeys);
 
 		}
 
@@ -1375,6 +1409,9 @@ namespace s3d
 		//Crouch when secondary bindings are disabled
 		HandleVRButton(*pPrimaryTrackedRemoteOld, *pPrimaryTrackedRemoteNew, openvr::vr::k_EButton_Grip, KEY_PAD_RSHOULDER,
 			!vr_alternate_mappings, !vr_alternate_mappings);
+		//System button (below A on Index controllers), bindable as Pad_Start. SteamVR may also open its dashboard on it.
+		HandleVRButton(*pPrimaryTrackedRemoteOld, *pPrimaryTrackedRemoteNew, openvr::vr::k_EButton_System, KEY_PAD_START,
+			true, true);
 
 		//Dominant Hand - Secondary keys (grip pushed)
 		
