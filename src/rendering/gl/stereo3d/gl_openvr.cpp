@@ -149,6 +149,7 @@ EXTERN_CVAR(Bool, openvr_rightHanded)
 EXTERN_CVAR(Bool, openvr_moveFollowsOffHand)
 EXTERN_CVAR(Bool, vr_snap_turn);
 EXTERN_CVAR(Bool, openvr_drawControllers)
+EXTERN_CVAR(Int, openvr_desktop_view)
 EXTERN_CVAR(Float, openvr_weaponRotate);
 EXTERN_CVAR(Float, openvr_weaponScale);
 
@@ -1120,7 +1121,34 @@ namespace s3d
 	void OpenVRMode::Present() const {
 		GLRenderer->mBuffers->BlitToEyeTexture(GLRenderer->mBuffers->CurrentEye(), false);
 		// TODO: For performance, don't render to the desktop screen here
-		if (doRenderToDesktop) {
+		if (doRenderToDesktop && openvr_desktop_view == 1 && sceneWidth > 0 && sceneHeight > 0)
+		{
+			// Show a regular, undistorted image on the desktop: the left eye only, scaled to fill the
+			// window and cropped where its aspect ratio differs.
+			GLRenderer->mBuffers->BindOutputFB();
+			GLRenderer->ClearBorders();
+
+			const IntRect& window = screen->mOutputLetterbox;
+			IntRect box = window;
+			int scaledHeight = int(int64_t(window.width) * sceneHeight / sceneWidth);
+			if (scaledHeight >= window.height)
+			{
+				box.height = scaledHeight;
+				box.top -= (scaledHeight - window.height) / 2;
+			}
+			else
+			{
+				box.width = int(int64_t(window.height) * sceneWidth / sceneHeight);
+				box.left -= (box.width - window.width) / 2;
+			}
+
+			glEnable(GL_SCISSOR_TEST);
+			glScissor(window.left, window.top, window.width, window.height);
+			GLRenderer->mBuffers->BindEyeTexture(0, 0);
+			GLRenderer->DrawPresentTexture(box, true);
+			glDisable(GL_SCISSOR_TEST);
+		}
+		else if (doRenderToDesktop) {
 			GLRenderer->mBuffers->BindOutputFB();
 			GLRenderer->ClearBorders();
 
