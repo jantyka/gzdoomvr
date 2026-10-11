@@ -4,8 +4,9 @@ name: AppImage
 # published as a release from here.
 #
 # Built on Ubuntu 22.04 so that the result also runs on distributions with an older glibc.
-# The AppImage contains the game, its own data files, OpenVR, ZMusic, SDL2 and OpenAL. It
-# does not contain game data (DOOM.WAD, DOOM2.WAD), mods, or SteamVR.
+# The AppImage contains the game, its own data files, OpenVR, ZMusic and SDL2. It does not
+# contain game data (DOOM.WAD, DOOM2.WAD), mods, SteamVR, or OpenAL: the game loads the
+# OpenAL of the system at run time, which knows the sound server of that system.
 
 on:
   workflow_dispatch:
@@ -85,11 +86,10 @@ jobs:
           version="$(git describe --tags --always)"
           export LINUXDEPLOY_OUTPUT_VERSION="$version"
           export LD_LIBRARY_PATH="$RUNNER_TEMP/zmusic/lib"
-          # OpenAL is loaded at run time by name, so it has to be named here to be bundled.
           ./linuxdeploy --appdir AppDir \
             --executable AppDir/usr/bin/gzdoomvr \
             --library "$RUNNER_TEMP/zmusic/lib/libzmusic.so.1" \
-            --library /usr/lib/x86_64-linux-gnu/libopenal.so.1 \
+            --custom-apprun linux/AppRun \
             --desktop-file linux/gzdoomvr.desktop \
             --icon-file gzdoomvr.png \
             --output appimage
@@ -110,6 +110,22 @@ jobs:
           test -f squashfs-root/usr/share/gzdoomvr/linux/index_controller.cfg
           ls squashfs-root/usr/lib | sort | tr '\n' ' '
           echo
+
+          # Start the AppImage itself once. Without game data it has to get as far as asking
+          # for an IWAD; "Cannot find gzdoom.pk3" would mean it does not find its own files.
+          # The message goes to a dialog program, so put a stand-in for it into the PATH.
+          mkdir fakedialog "$RUNNER_TEMP/emptyhome"
+          printf '#!/bin/sh\nprintf "%%s\\n" "$@" >> "%s/dialog.txt"\n' "$PWD" > fakedialog/zenity
+          chmod +x fakedialog/zenity
+          for tool in kdialog xmessage gxmessage; do ln -s zenity "fakedialog/$tool"; done
+          PATH="$PWD/fakedialog:$PATH" HOME="$RUNNER_TEMP/emptyhome" APPIMAGE_EXTRACT_AND_RUN=1 \
+            timeout 120 "./$image" -norun > start.log 2>&1 || true
+          cat start.log dialog.txt 2>/dev/null | tail -n 15
+          if grep -q "gzdoom.pk3" dialog.txt start.log 2>/dev/null; then
+            echo "The AppImage does not find its own data files."
+            exit 1
+          fi
+          grep -qi "iwad" dialog.txt start.log
           sha256sum "$image" | tee "$image.sha256"
 
       - uses: actions/upload-artifact@v4

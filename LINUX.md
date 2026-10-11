@@ -3,7 +3,8 @@
 This fork makes GZDoomVR build and run natively on Linux, against the existing OpenVR
 interface and SteamVR for Linux. It was developed and tested with a Valve Index.
 
-There are no release builds yet. You build it from source as described below.
+There are no published releases yet. You build it from source as described below, or
+take the [AppImage](#appimage) from a workflow run.
 
 - **Playing:** see [linux/README.md](linux/README.md) for the first start, the controller
   layout, how to change it, and mods.
@@ -90,6 +91,30 @@ installation is not touched: GZDoomVR keeps its configuration and savegames in
 `~/.config/gzdoomvr/`.
 
 If the build fails with `libvpx.so.X not found` after a system update, rebuild.
+
+## AppImage
+
+The workflow `.github/workflows/appimage.yml` builds an AppImage, so that nobody has to
+compile. It is built on Ubuntu 22.04 and should run on distributions from about that age
+on. There is no published release yet; the file is attached to the workflow runs under
+[Actions](https://github.com/jantyka/gzdoomvr/actions/workflows/appimage.yml) (GitHub only
+lets logged-in users download those).
+
+```
+chmod +x GZDoomVR-*-x86_64.AppImage
+./GZDoomVR-*-x86_64.AppImage -iwad /path/to/DOOM2.WAD
+```
+
+- It contains the game, its data files, OpenVR, ZMusic and SDL2.
+- It does **not** contain game data, mods or SteamVR.
+- It uses the OpenAL library of your system for sound (`openal` on Arch, `libopenal1` on
+  Debian and Ubuntu).
+- The files from `linux/` are inside under `usr/share/gzdoomvr/linux/`. To get them out,
+  run `./GZDoomVR-*-x86_64.AppImage --appimage-extract usr/share/gzdoomvr`, or take them
+  from the repository.
+
+Everything below applies to the AppImage as well; replace `./build/gzdoomvr` with the
+AppImage.
 
 ## Running
 
@@ -237,8 +262,8 @@ Not tested yet:
   back to the system MIDI device.
 - GNOME logs `Client provided invalid window geometry` when the window is created. No
   visible effect was noticed.
-- `AppImageBuilder.yml` is the unchanged upstream GZDoom template and does not produce a
-  working GZDoomVR AppImage.
+- `AppImageBuilder.yml` is the unchanged upstream GZDoom template and is not used. The
+  AppImage of this fork is built by `.github/workflows/appimage.yml`.
 
 ## Windows
 
