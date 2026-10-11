@@ -10,6 +10,7 @@
 #endif
 #include "openvr_include.h"
 #include "menu.h"
+#include "i_openVR.h"
 
 using namespace openvr;
 

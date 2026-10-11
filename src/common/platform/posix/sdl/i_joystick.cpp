@@ -40,9 +40,7 @@
 
 #if defined(USE_OPENVR) && !defined(__APPLE__)
 // Linux/SDL: the OpenVR controller device is not an SDL joystick, it lives in i_openVR.cpp
-void I_ShutdownOpenVR();
-void I_OpenVRGetJoysticks(TArray<IJoystickConfig *> &sticks);
-void I_OpenVRAddAxes(float axes[NUM_JOYAXIS]);
+#include "i_openVR.h"
 #endif
 
 #define DEFAULT_DEADZONE 0.25f;

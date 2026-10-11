@@ -76,8 +76,10 @@ namespace openvr {
 #include "openvr.h"
 }
 
-// Linux: guards the layout fix in openvr_include.h, the runtime expects the size from openvr.h
-static_assert(sizeof(openvr::VRControllerState_t) == sizeof(openvr::vr::VRControllerState_t), "VRControllerState_t layout mismatch");
+// Linux/macOS: guards the layout fix in openvr_include.h, the runtime expects the layout from openvr.h
+static_assert(sizeof(openvr::VRControllerState_t) == sizeof(openvr::vr::VRControllerState_t), "VRControllerState_t size mismatch");
+static_assert(offsetof(openvr::VRControllerState_t, ulButtonPressed) == offsetof(openvr::vr::VRControllerState_t, ulButtonPressed), "VRControllerState_t layout mismatch");
+static_assert(offsetof(openvr::VRControllerState_t, rAxis) == offsetof(openvr::vr::VRControllerState_t, rAxis), "VRControllerState_t layout mismatch");
 
 void I_StartupOpenVR();
 double P_XYMovement(AActor* mo, DVector2 scroll);
@@ -231,6 +233,15 @@ static int axisTrackpad = -1;
 static int axisJoystick = -1;
 static int axisTrigger = -1;
 static bool identifiedAxes = false;
+static bool isIndexController = false;
+
+// Linux: the input additions guarded by this flag are only active in the Linux build. They could
+// not be tested on Windows, where the behavior stays exactly as it was.
+#ifdef __linux__
+static const bool linuxInputAdditions = true;
+#else
+static const bool linuxInputAdditions = false;
+#endif
 
 LSVec3 openvr_dpos(0, 0, 0);
 DAngle openvr_to_doom_angle;
@@ -1342,19 +1353,39 @@ namespace s3d
 			(pPrimaryTrackedRemoteNew->ulButtonPressed & ButtonMaskFromId(openvr::vr::k_EButton_Grip)) : false;
 
 		auto threshold = 0.9f;
-		// Index controllers report no axis of type joystick (trackpad, trigger, trigger), their
-		// thumbstick arrives on the trackpad axis. Without the fallback the menu read rAxis[-1].
-		int stickAxis = axisJoystick != -1 ? axisJoystick : axisTrackpad;
-		if (stickAxis != -1 && CurrentMenu != nullptr && menuactive != MENU_Off && menuactive != MENU_WaitKey)
+		// -1 if the controller reports no stick. The checks below keep the menu from reading rAxis[-1].
+		int stickAxis = axisJoystick;
+
+		// True while a menu takes navigation input. Not while it waits for a key to bind.
+		bool menuNavigates = CurrentMenu != nullptr && menuactive != MENU_Off && menuactive != MENU_WaitKey;
+
+		// Linux: a trigger pull that confirmed a menu entry must not arrive as a key as well: if that
+		// entry closes the menu, the weapon would fire. It stays blocked until the trigger is released.
+		static bool triggerHeldFromMenu = false;
+		bool triggerBlockedOld = triggerHeldFromMenu;
+		if (!(pPrimaryTrackedRemoteNew->ulButtonPressed & ButtonMaskFromId(openvr::vr::k_EButton_Axis1)))
 		{
-			HandleUIVRAxes(*pPrimaryTrackedRemoteOld, *pPrimaryTrackedRemoteNew, stickAxis, GK_LEFT, GK_RIGHT, GK_DOWN, GK_UP);
-			HandleUIVRAxes(*pSecondaryTrackedRemoteOld, *pSecondaryTrackedRemoteNew, stickAxis, GK_LEFT, GK_RIGHT, GK_DOWN, GK_UP);
+			triggerHeldFromMenu = false;
 		}
-		if (CurrentMenu != nullptr && menuactive != MENU_Off && menuactive != MENU_WaitKey)
+		else if (linuxInputAdditions && menuNavigates)
 		{
-			// The weapon hand trigger confirms in menus. SteamVR's default legacy binding reports the
-			// A button of Index controllers as grip, so KEY_PAD_A never arrives there.
-			HandleUIVRButton(*pPrimaryTrackedRemoteOld, *pPrimaryTrackedRemoteNew, openvr::vr::k_EButton_Axis1, GK_RETURN);
+			triggerHeldFromMenu = true;
+		}
+		bool triggerBlockedNew = triggerHeldFromMenu;
+
+		if (menuNavigates)
+		{
+			if (stickAxis != -1)
+			{
+				HandleUIVRAxes(*pPrimaryTrackedRemoteOld, *pPrimaryTrackedRemoteNew, stickAxis, GK_LEFT, GK_RIGHT, GK_DOWN, GK_UP);
+				HandleUIVRAxes(*pSecondaryTrackedRemoteOld, *pSecondaryTrackedRemoteNew, stickAxis, GK_LEFT, GK_RIGHT, GK_DOWN, GK_UP);
+			}
+			// Linux: the weapon hand trigger confirms in menus. SteamVR's default legacy binding reports
+			// the A button of Index controllers as grip, so KEY_PAD_A never arrives there.
+			if (linuxInputAdditions)
+			{
+				HandleUIVRButton(*pPrimaryTrackedRemoteOld, *pPrimaryTrackedRemoteNew, openvr::vr::k_EButton_Axis1, GK_RETURN);
+			}
 		}
 
 	
@@ -1403,16 +1434,15 @@ namespace s3d
 				(pSecondaryTrackedRemoteNew->rAxis[stickAxis].x > threshold && dominantGripPushedNew && !vr_snap_turn ? 1 : 0),
 				1, KEY_PAD_DPAD_RIGHT);
 
-			// Stick directions without grip arrive as the regular gamepad stick keys, so they can be bound
+			// Linux: stick directions without grip arrive as the regular gamepad stick keys, so they can be bound
 			// under "Customize Controls" (e.g. RStickLeft/RStickRight to change weapons). Not while a menu
-			// is open: the menu treats the left stick keys as navigation and would move twice.
-			bool inMenu = CurrentMenu != nullptr && menuactive != MENU_Off;
+			// navigates: it treats the left stick keys as navigation and would move twice.
 			static const int dominantStickKeys[] = { KEY_PAD_RTHUMB_LEFT, KEY_PAD_RTHUMB_RIGHT, KEY_PAD_RTHUMB_DOWN, KEY_PAD_RTHUMB_UP };
 			static const int offStickKeys[] = { KEY_PAD_LTHUMB_LEFT, KEY_PAD_LTHUMB_RIGHT, KEY_PAD_LTHUMB_DOWN, KEY_PAD_LTHUMB_UP };
 			HandleVRStickKeys(*pPrimaryTrackedRemoteOld, *pPrimaryTrackedRemoteNew, stickAxis, threshold,
-				!dominantGripPushedOld && !inMenu, !dominantGripPushedNew && !inMenu, dominantStickKeys);
+				linuxInputAdditions && !dominantGripPushedOld && !menuNavigates, linuxInputAdditions && !dominantGripPushedNew && !menuNavigates, dominantStickKeys);
 			HandleVRStickKeys(*pSecondaryTrackedRemoteOld, *pSecondaryTrackedRemoteNew, stickAxis, threshold,
-				!dominantGripPushedOld && !inMenu, !dominantGripPushedNew && !inMenu, offStickKeys);
+				linuxInputAdditions && !dominantGripPushedOld && !menuNavigates, linuxInputAdditions && !dominantGripPushedNew && !menuNavigates, offStickKeys);
 
 		}
 
@@ -1433,18 +1463,19 @@ namespace s3d
 			!dominantGripPushedOld, !dominantGripPushedNew);
 		//Fire
 		HandleVRButton(*pPrimaryTrackedRemoteOld, *pPrimaryTrackedRemoteNew, openvr::vr::k_EButton_Axis1, KEY_PAD_RTRIGGER, 
-			!dominantGripPushedOld, !dominantGripPushedNew);
+			!dominantGripPushedOld && !triggerBlockedOld, !dominantGripPushedNew && !triggerBlockedNew);
 		//Crouch when secondary bindings are disabled
 		HandleVRButton(*pPrimaryTrackedRemoteOld, *pPrimaryTrackedRemoteNew, openvr::vr::k_EButton_Grip, KEY_PAD_RSHOULDER,
 			!vr_alternate_mappings, !vr_alternate_mappings);
-		//System button (below A on Index controllers), bindable as Pad_Start. SteamVR may also open its dashboard on it.
+		//Linux: system button (below A on Index controllers), bindable as Pad_Start. SteamVR may also open its dashboard on it.
 		HandleVRButton(*pPrimaryTrackedRemoteOld, *pPrimaryTrackedRemoteNew, openvr::vr::k_EButton_System, KEY_PAD_START,
-			true, true);
-		//Axis2/Axis3 presses, bindable as DPadUp/DPadDown. linux/steamvr_bindings/index_legacy.json sends the upper and lower half of the trackpad here.
+			linuxInputAdditions, linuxInputAdditions);
+		//Linux: Axis2/Axis3 presses, bindable as DPadUp/DPadDown. linux/steamvr_bindings/index_legacy.json sends the upper
+		//and lower half of the Index trackpad here. Index only: other controllers may report their grip as an Axis2 press.
 		HandleVRButton(*pPrimaryTrackedRemoteOld, *pPrimaryTrackedRemoteNew, openvr::vr::k_EButton_Axis2, KEY_PAD_DPAD_UP,
-			true, true);
+			linuxInputAdditions && isIndexController, linuxInputAdditions && isIndexController);
 		HandleVRButton(*pPrimaryTrackedRemoteOld, *pPrimaryTrackedRemoteNew, openvr::vr::k_EButton_Axis3, KEY_PAD_DPAD_DOWN,
-			true, true);
+			linuxInputAdditions && isIndexController, linuxInputAdditions && isIndexController);
 
 		//Dominant Hand - Secondary keys (grip pushed)
 		
@@ -1459,7 +1490,7 @@ namespace s3d
 			dominantGripPushedOld, dominantGripPushedNew);
 		//Alt-Fire
 		HandleVRButton(*pPrimaryTrackedRemoteOld, *pPrimaryTrackedRemoteNew, openvr::vr::k_EButton_Axis1, KEY_PAD_RTRIGGER_ALT,
-			dominantGripPushedOld, dominantGripPushedNew);
+			dominantGripPushedOld && !triggerBlockedOld, dominantGripPushedNew && !triggerBlockedNew);
 
 
 		//Off Hand - Primary keys (no grip pushed)
@@ -1672,6 +1703,21 @@ namespace s3d
 								if (axisTrigger == -1) axisTrigger = a;
 								break;
 							}
+						}
+
+						char controllerType[64] = "";
+						ETrackedPropertyError controllerTypeError;
+						vrSystem->GetStringTrackedDeviceProperty(i, ETrackedDeviceProperty_Prop_ControllerType_String, controllerType, sizeof(controllerType), &controllerTypeError);
+						isIndexController = strcmp(controllerType, "knuckles") == 0;
+
+						// Linux: Index controllers report their axes as trackpad, trigger, trigger. There is no axis
+						// of type joystick, SteamVR's legacy input delivers the thumbstick on the trackpad axis.
+						// Treat that axis as the stick, otherwise the menu, the stick keys and the "Joystick" entries
+						// under Controller Options never see it.
+						if (linuxInputAdditions && isIndexController && axisJoystick == -1 && axisTrackpad != -1)
+						{
+							axisJoystick = axisTrackpad;
+							axisTrackpad = -1;
 						}
 					}
 
