@@ -11,6 +11,7 @@ Files in this directory:
 | `steamvr_bindings/select_binding.sh` | Selects that binding in a running SteamVR. |
 | `index_controller.cfg` | Assigns game actions to those keys. Edit this one to change the layout. |
 | `index_controller_brutaldoom.cfg` | Additional assignments for Brutal Doom. |
+| `get-tested-mods.sh` | Fetches the weapon packs and checks the other tested mods, see [below](#3d-weapons-and-other-mods). |
 
 ## First start
 
@@ -148,6 +149,12 @@ These commands only exist while Brutal Doom is loaded. To get the plain layout b
 
 Mods are loaded as in GZDoom, in the order given after `-file`. File names are case
 sensitive on Linux.
+
+`linux/get-tested-mods.sh [directory]` collects the mods this fork was tested with. It
+downloads the two weapon packs from GitHub and checks them against known checksums.
+Brutal Doom and the Liquid Texture Pack are on ModDB, which does not allow scripted
+downloads: the script tells you where to get them and checks the files once they are in
+the directory. At the end it prints the tested load order.
 
 - **3D weapon models.** Without a weapon pack the weapons are flat sprites. The packs
   linked in the main README work: `HDVRweapons.zip` for the original games and
