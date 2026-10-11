@@ -95,7 +95,10 @@ these are the ones the binding above produces:
 | `RStickLeft`, `RStickRight`, `RStickUp`, `RStickDown` | thumbstick pushed to the edge | `LStickLeft`, ... | thumbstick pushed to the edge |
 | `Pad_Start` | system button, if SteamVR passes it on | | |
 
-A line looks like `bind RShoulder +jump`. To free a key, use `unbind RShoulder`.
+A line looks like `wait 2; bind RShoulder +jump`. To free a key, use
+`wait 2; unbind RShoulder`. The `wait 2;` in front is needed: without it the game replaces
+bindings from the script with what `gzdoomvr.ini` holds for the key sections of a loaded
+mod. In the console or the options menu you do not need it.
 
 Two things are fixed in the game and cannot be rebound: in menus `Pad_A` and the weapon
 hand trigger confirm and `Pad_B` goes back. That is why the binding sends the physical B
