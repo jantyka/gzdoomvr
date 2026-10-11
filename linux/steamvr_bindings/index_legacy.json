@@ -68,7 +68,8 @@
 						}
 					},
 					"parameters": {
-						"click_activate_threshold": "0.8",
+						"click_activate_threshold": "0.5",
+						"click_deactivate_threshold": "0.45",
 						"force_input": "force"
 					}
 				},
@@ -147,7 +148,8 @@
 						}
 					},
 					"parameters": {
-						"click_activate_threshold": "0.8",
+						"click_activate_threshold": "0.5",
+						"click_deactivate_threshold": "0.45",
 						"force_input": "force"
 					}
 				},
@@ -195,12 +197,27 @@
 							"output": "/actions/legacy/in/right_axis3_press"
 						}
 					}
+				},
+				{
+					"path": "/user/hand/left/input/trackpad",
+					"mode": "dpad",
+					"parameters": {
+						"sub_mode": "click"
+					},
+					"inputs": {
+						"north": {
+							"output": "/actions/legacy/in/left_axis2_press"
+						},
+						"south": {
+							"output": "/actions/legacy/in/left_axis3_press"
+						}
+					}
 				}
 			]
 		}
 	},
 	"controller_type": "knuckles",
-	"description": "Index controller binding for GZDoomVR on Linux. Right hand: B arrives as A (confirm/use), A as application menu (back), trackpad up/down as axis 2/3 press. The thumbsticks do not click when pushed to the edge.",
+	"description": "Index controller binding for GZDoomVR on Linux. Right hand: B arrives as A (confirm/use), A as application menu (back). Trackpad upper/lower half arrive as axis 2/3 press on both hands. The grips click at half force. The thumbsticks do not click when pushed to the edge.",
 	"name": "GZDoomVR Linux - Index Controller",
 	"options": {},
 	"simulated_actions": []

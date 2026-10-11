@@ -1477,6 +1477,12 @@ namespace s3d
 			linuxInputAdditions && isIndexController, linuxInputAdditions && isIndexController);
 		HandleVRButton(*pPrimaryTrackedRemoteOld, *pPrimaryTrackedRemoteNew, openvr::vr::k_EButton_Axis3, KEY_PAD_DPAD_DOWN,
 			linuxInputAdditions && isIndexController, linuxInputAdditions && isIndexController);
+		//Linux: the same for the off hand trackpad, bindable as DPadLeft/DPadRight. With vr_alternate_mappings these
+		//two keys also come from grip + off hand stick.
+		HandleVRButton(*pSecondaryTrackedRemoteOld, *pSecondaryTrackedRemoteNew, openvr::vr::k_EButton_Axis2, KEY_PAD_DPAD_LEFT,
+			linuxInputAdditions && isIndexController, linuxInputAdditions && isIndexController);
+		HandleVRButton(*pSecondaryTrackedRemoteOld, *pSecondaryTrackedRemoteNew, openvr::vr::k_EButton_Axis3, KEY_PAD_DPAD_RIGHT,
+			linuxInputAdditions && isIndexController, linuxInputAdditions && isIndexController);
 
 		//Dominant Hand - Secondary keys (grip pushed)
 		

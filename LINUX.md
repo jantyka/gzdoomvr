@@ -162,8 +162,8 @@ tested on Windows:
 - The weapon hand trigger confirms in menus.
 - Thumbstick directions arrive as the keys `LStick*`/`RStick*` and can be bound.
 - The weapon hand system button arrives as `Pad_Start`.
-- The upper and lower half of the Index trackpad arrive as `DPadUp`/`DPadDown` (Index
-  controllers only).
+- The upper and lower half of the Index trackpads arrive as `DPadUp`/`DPadDown` (weapon
+  hand) and `DPadLeft`/`DPadRight` (off hand). Index controllers only.
 
 Other:
 

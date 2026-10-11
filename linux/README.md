@@ -55,12 +55,12 @@ This is the layout from `index_controller.cfg`, for a right-handed setup.
 |---|---|---|
 | Trigger | fire | confirm |
 | Thumbstick left/right | turn | navigate |
-| Thumbstick click | open the menu | |
+| Thumbstick click | not assigned | |
 | Trackpad, upper half (press) | next weapon | |
 | Trackpad, lower half (press) | previous weapon | |
 | B | use | confirm |
 | A | not assigned | back |
-| Grip (squeeze) | jump | |
+| Grip (squeeze, from half force) | jump | |
 
 **Left controller**
 
@@ -68,11 +68,13 @@ This is the layout from `index_controller.cfg`, for a right-handed setup.
 |---|---|---|
 | Thumbstick | move and strafe | navigate |
 | Trigger | alternate fire | |
-| Grip (squeeze) | crouch while held | |
-| Thumbstick click, A | use inventory item | |
+| Grip (squeeze, from half force) | crouch while held | |
+| Thumbstick click | switch always-run on and off | |
+| A | open the menu | |
 | B | automap | |
+| Trackpad | not assigned | |
 
-The weapon follows the right hand. Running has no button in this layout.
+The weapon follows the right hand. Using an inventory item has no button in this layout.
 
 ## Changing the layout
 
@@ -89,7 +91,7 @@ these are the ones the binding above produces:
 | `Pad_B` | A button | `Pad_Y` | B button |
 | `RShoulder` | grip | `LShoulder` | grip |
 | `RThumb` | thumbstick click | `LThumb` | thumbstick click |
-| `DPadUp` / `DPadDown` | trackpad upper / lower half | | |
+| `DPadUp` / `DPadDown` | trackpad upper / lower half | `DPadLeft` / `DPadRight` | trackpad upper / lower half |
 | `RStickLeft`, `RStickRight`, `RStickUp`, `RStickDown` | thumbstick pushed to the edge | `LStickLeft`, ... | thumbstick pushed to the edge |
 | `Pad_Start` | system button, if SteamVR passes it on | | |
 
@@ -130,8 +132,9 @@ Tested with Brutal Doom v21. Load the additional bindings on top:
 |---|---|
 | Right thumbstick forward | kick |
 | Right thumbstick back | reload |
+| Right thumbstick click | throw grenade |
 | Left trigger | dual wield / special action (replaces alternate fire) |
-| Left thumbstick click | throw grenade (replaces use inventory item) |
+| Left trackpad (press) | offend |
 
 These commands only exist while Brutal Doom is loaded. To get the plain layout back, load
 `index_controller.cfg` again.
