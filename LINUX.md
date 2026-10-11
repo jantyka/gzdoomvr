@@ -104,9 +104,9 @@ Continue with [linux/README.md](linux/README.md) for the controller setup.
 Things to know:
 
 - **Every start contacts SteamVR.** If a headset is attached, GZDoomVR starts SteamVR
-  even when `vr_mode` is not set to OpenVR. This is how upstream behaves. Starting SteamVR
-  this way instead of from Steam made its status window (`vrmonitor`) crash on the test
-  system, so start SteamVR from Steam first.
+  even when `vr_mode` is not set to OpenVR. This is how upstream behaves. Start SteamVR
+  from Steam first: started by the game instead, its status window (`vrmonitor`) crashed
+  on the test system and SteamVR shut down again.
 - **`vr_mode` must be 10** (OpenVR) for the image to appear in the headset. That is the
   default. If the game only shows on the monitor, type `vr_mode 10` in the console.
 - **Audio.** SteamVR does not make the headset the default audio device on Linux. Select
@@ -181,8 +181,8 @@ Other:
 | Desktop | GNOME 51 on Wayland |
 | GPU | AMD Radeon RX 7900 XT, Mesa 26.2.4 (radeonsi / RADV) |
 | CPU | AMD Ryzen 7 9800X3D |
-| Headset | Valve Index with Index controllers, 90 Hz |
-| SteamVR | 2.16.7 for most tests, 2.17.10 for a short final run |
+| Headset | Valve Index with Index controllers, at 90 Hz and 144 Hz |
+| SteamVR | 2.16.7 for the first day of tests, 2.17.10 since |
 | Compiler | GCC 16.2.1, CMake 4.4.4 |
 
 What was tested, October 2026:
@@ -198,12 +198,26 @@ What was tested, October 2026:
 | LTP V7.0.1 liquid textures with real time reflections (`linux-openvr-4.14` only) | works |
 | Loading a savegame from another mod combination | error message, no crash |
 | Exit | no crash |
+| 144 Hz without reprojection | reached, see below |
+
+### Frame timing
+
+Read from SteamVR's own statistics (`vrcompositor.txt`) after sessions that were actually
+played with the headset on. SteamVR 2.17.10, default GPU and CPU power profiles, render
+resolution as recommended by SteamVR.
+
+| Session | Refresh rate | Length | Frames per second | Dropped | Reprojected | Application time CPU / GPU |
+|---|---|---|---|---|---|---|
+| Doom 2, Brutal Doom v21, `br_vr`, LTP; MAP29 and MAP30 | 144 Hz | 16 min 38 s | 143.3 | 0.45 % | 0 | 4.5 ms / 5.0 ms |
+| same mods; MAP01 and MAP02 | 144 Hz | 4 min 6 s | 142.9 | 0.65 % | 0 | 3.1 ms / 3.7 ms |
+| Doom, same mods; E4M1 | 90 Hz | 17 min 44 s | 89.7 | 0.24 % | 0 | 4.4 ms / 4.9 ms |
+
+At 144 Hz a frame has 6.9 ms. A large part of the dropped frames falls into loading
+phases. These are single sessions on one machine, not a benchmark series.
 
 Not tested yet:
 
-- Frame timing measured over longer runs, and refresh rates above 90 Hz. In the test runs
-  SteamVR reported no reprojected frames at 90 Hz, but those runs were between one and
-  ten minutes long and are not a benchmark.
+- Frame timing for the game without mods, and at 120 Hz.
 - Snap turning, left-handed setup, haptics.
 - Controllers other than the Index.
 - Any distribution other than Arch Linux.
@@ -212,7 +226,11 @@ Not tested yet:
 
 - SteamVR 2.16.7 crashed three times on the test system (`vrcompositor`, once at start,
   once while idle, once at shutdown), each time without GZDoomVR being the cause as far as
-  the logs show. Whether 2.17.10 fixes this is not known yet.
+  the logs show. With 2.17.10 the compositor has not crashed so far, over several sessions
+  on one evening.
+- With SteamVR 2.17.10, a `vrmonitor` process aborts every time the game starts
+  (`std::logic_error`, "basic_string::_S_construct null not valid"). SteamVR and the game
+  keep running. The cause has not been looked into.
 - The weapon hand system button is reserved by SteamVR for its dashboard and may not reach
   the game.
 - Without the FluidR3 soundfonts the log shows `Could not find patch set` and music falls
