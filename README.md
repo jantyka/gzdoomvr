@@ -97,12 +97,13 @@ Started once without problems, but not looked at closely:
   weapon pack by dxt121730. Played on the intro map only. BD64Weapons logs non-fatal
   script errors in five of its model definitions.
 
-- [Voxel Doom II](https://www.moddb.com/mods/voxel-doom-ii) v2.4 by Cheello, voxel models
-  for monsters, items and decorations. Played on MAP01 of Doom 2 only, without other
-  mods. Take `VoxelDoom_v2.4.pk3` from the mod's
-  [addons](https://www.moddb.com/mods/voxel-doom-ii/addons/voxel-doom-ii-with-parallax-textures).
-  The "Doom 2: Ray Traced" download under "Files" on the same page is not this mod: it
-  is a separate Windows program with its own renderer and cannot be loaded into GZDoomVR.
+- [Voxel Doom II](https://www.moddb.com/mods/voxel-doom-ii) v2.4 by Cheello, a voxel
+  model pack. Played for a minute on MAP01 of Doom 2, without other mods; the individual
+  models were not checked. Version 2.4 is the addon
+  ["Voxel Doom II with Parallax Textures"](https://www.moddb.com/mods/voxel-doom-ii/addons/voxel-doom-ii-with-parallax-textures),
+  file `VoxelDoom_v2.4.pk3`. The "Doom 2: Ray Traced" download under "Files" on the same
+  page is not this mod: it is a separate Windows program with its own renderer, and its
+  data files fail to load in GZDoomVR with script errors.
 
 Listed by upstream and not tried here:
 
