@@ -272,7 +272,7 @@ What was tested, October 2026:
 | Brutal Doom v21 with Doom and Doom 2 | works |
 | Brutal Doom v21 with the `br_vr` 3D weapons | works |
 | LTP V7.0.1 liquid textures with real time reflections | works |
-| Brutal Doom 64 v2 with its maps and the `BD64Weapons` 3D weapons, intro map only | works |
+| Brutal Doom 64 v2 with its maps and the `BD64Weapons` 3D weapons | starts and plays; intro map only, weapon models not checked |
 | Loading a savegame from another mod combination | error message, no crash |
 | Exit | no crash |
 | 144 Hz without reprojection | reached, see below |
@@ -305,7 +305,8 @@ Not tested yet:
   once while idle, once at shutdown), each time without GZDoomVR being the cause as far as
   the logs show. With 2.17.10 it crashed once more, a few seconds after SteamVR was
   started and before the game ran (watchdog timeout in the render thread, together with an
-  `amdgpu` kernel message). It has not crashed while the game was running.
+  `amdgpu` kernel message). With 2.17.10 the compositor has not crashed while the game
+  was running.
 - With SteamVR 2.17.10, a `vrmonitor` process aborts every time the game starts
   (`std::logic_error`, "basic_string::_S_construct null not valid"). SteamVR and the game
   keep running. The cause has not been looked into.
