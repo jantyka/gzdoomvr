@@ -94,24 +94,73 @@ If the build fails with `libvpx.so.X not found` after a system update, rebuild.
 
 ## AppImage
 
-The workflow `.github/workflows/appimage.yml` builds an AppImage, so that nobody has to
-compile. It is built on Ubuntu 22.04 and should run on distributions from about that age
-on. There is no published release yet; the file is attached to the workflow runs under
-[Actions](https://github.com/jantyka/gzdoomvr/actions/workflows/appimage.yml) (GitHub only
-lets logged-in users download those).
+An AppImage is a single file that runs without installing and without compiling. It is
+built on Ubuntu 22.04 and should run on distributions from about that age on.
+
+### Getting it
+
+There is no published release yet. Until there is one, the AppImage comes from the build
+runs on GitHub, and GitHub only lets logged-in users download those.
+
+In the browser:
+
+1. Open [Actions -> AppImage](https://github.com/jantyka/gzdoomvr/actions/workflows/appimage.yml).
+2. Click the newest run with a green check mark.
+3. At the bottom of the page, under "Artifacts", download `GZDoomVR-AppImage`.
+4. Unpack the downloaded zip file. It contains the `.AppImage` and a `.sha256` file.
+
+Or with the GitHub command line tool:
 
 ```
+gh run download -R jantyka/gzdoomvr -n GZDoomVR-AppImage
+```
+
+Then check the file and make it executable:
+
+```
+sha256sum --check GZDoomVR-*.AppImage.sha256
 chmod +x GZDoomVR-*-x86_64.AppImage
+```
+
+### Starting it
+
+Start SteamVR from Steam first, with the headset on.
+
+```
 ./GZDoomVR-*-x86_64.AppImage -iwad /path/to/DOOM2.WAD
 ```
 
-- It contains the game, its data files, OpenVR, ZMusic and SDL2.
-- It does **not** contain game data, mods or SteamVR.
-- It uses the OpenAL library of your system for sound (`openal` on Arch, `libopenal1` on
-  Debian and Ubuntu).
-- The files from `linux/` are inside under `usr/share/gzdoomvr/linux/`. To get them out,
-  run `./GZDoomVR-*-x86_64.AppImage --appimage-extract usr/share/gzdoomvr`, or take them
-  from the repository.
+The AppImage takes the same options as the game. With mods and the controller layout:
+
+```
+# once: get the layout files out of the AppImage, into ./squashfs-root/
+./GZDoomVR-*-x86_64.AppImage --appimage-extract usr/share/gzdoomvr
+L="$PWD/squashfs-root/usr/share/gzdoomvr/linux"
+
+# once, while SteamVR runs and after the game has been started one time:
+"$L/steamvr_bindings/select_binding.sh"
+
+# optional: fetch the tested weapon packs into ./mods and see what else is needed
+"$L/get-tested-mods.sh" mods
+
+# Doom 2 with Brutal Doom and the 3D weapons
+./GZDoomVR-*-x86_64.AppImage -iwad /path/to/DOOM2.WAD \
+    -file mods/brutalv21.pk3 mods/BR_VR_pbr_RC2.zip \
+    +exec "$L/index_controller.cfg" \
+    +exec "$L/index_controller_brutaldoom.cfg"
+```
+
+Mods are loaded in the order given after `-file`. Without Brutal Doom, leave out its two
+files and the second `+exec`. [linux/README.md](linux/README.md) explains the layout
+files, the SteamVR binding and the mods in detail.
+
+### What is inside
+
+- The game, its data files, OpenVR, ZMusic and SDL2.
+- **Not** included: game data (`DOOM.WAD`, `DOOM2.WAD`), mods, SteamVR.
+- Sound uses the OpenAL library of your system (`openal` on Arch, `libopenal1` on Debian
+  and Ubuntu).
+- Configuration and savegames go to `~/.config/gzdoomvr/`, as with a self-built binary.
 
 Everything below applies to the AppImage as well; replace `./build/gzdoomvr` with the
 AppImage.
