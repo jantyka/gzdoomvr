@@ -7,7 +7,7 @@ name: Build
 on:
   push:
     branches:
-      - 'linux-openvr*'
+      - 'linux-openvr-4.14'
   pull_request:
   workflow_dispatch:
 
