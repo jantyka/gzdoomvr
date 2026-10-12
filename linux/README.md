@@ -168,9 +168,9 @@ the directory. At the end it prints the tested load order.
   If the weapon points too far up or down in your hand, change `openvr_weaponRotate`
   (default -40) in the console. The `br_vr` README suggests -56 for the Vive.
 
-- **Mods that need a newer engine.** A mod made for GZDoom 4.14 stops the branch
-  `linux-openvr` with "requires a newer version of GZDoomVR". Use the branch
-  `linux-openvr-4.14` for those.
+- **Mods that need a newer engine.** A mod made for GZDoom 4.14 stops the frozen
+  4.13 variant (tag `linux-openvr-4.13-final`) with "requires a newer version of
+  GZDoomVR". Use the branch `linux-openvr-4.14` for those.
 
 - **Savegames** belong to the mod combination they were saved with. Loading one with
   other mods fails with a message such as "Level was saved with a different number of ACS

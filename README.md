@@ -85,8 +85,7 @@ Mods are loaded as in GZDoom with `-file`. Tested in this fork:
 - [Brutal Doom](https://www.moddb.com/mods/brutal-doom) v21, with Doom and Doom 2
 - [br_vr](https://github.com/ajantaju/br_vr/releases), 3D weapon models for Brutal Doom
   v21 by ajantaju
-- LTP V7.0.1, liquid textures with real time reflections. It requires GZDoom 4.14 and
-  therefore the branch `linux-openvr-4.14`.
+- LTP V7.0.1, liquid textures with real time reflections. It requires GZDoom 4.14.
 
 Started once without problems, but not looked at closely:
 
@@ -109,11 +108,11 @@ packs and tells you where to get the others.
 
 ## Branches
 
-| Branch | Based on |
+| Branch or tag | Based on |
 |---|---|
-| `linux-openvr-4.14` | upstream `openvr_controller` with GZDoom 4.14.2. Recommended. |
-| `linux-openvr` | the upstream release `gvr4.13.2.2` with GZDoom 4.13.2 |
-| `openvr_controller` | unchanged upstream |
+| branch `linux-openvr-4.14` | upstream `openvr_controller` with GZDoom 4.14.2. The Linux port. |
+| tag `linux-openvr-4.13-final` | the upstream release `gvr4.13.2.2` with GZDoom 4.13.2. Frozen, no longer developed. |
+| branch `openvr_controller` | unchanged upstream |
 
 ## Where this comes from
 

@@ -12,13 +12,15 @@ take the [AppImage](#appimage) from a workflow run.
 
 ## Branches
 
-| Branch | Based on | Notes |
-|---|---|---|
-| `linux-openvr-4.14` | upstream `openvr_controller` (GZDoom 4.14.2) | Recommended. Needed for mods that require GZDoom 4.14. |
-| `linux-openvr` | release `gvr4.13.2.2` (GZDoom 4.13.2) | Same Linux changes on the last release. |
+The port is developed on one branch, `linux-openvr-4.14`. It is based on upstream
+`openvr_controller` (GZDoom 4.14.2).
 
-The executable still reports `gvr4.13.2.2-…` on both branches, because that is the last
-upstream tag.
+A variant with the same Linux changes on the release `gvr4.13.2.2` (GZDoom 4.13.2) existed
+as the branch `linux-openvr`. It is frozen and no longer developed; its last state stays
+reachable as the tag `linux-openvr-4.13-final` (`git checkout linux-openvr-4.13-final`).
+Mods that require GZDoom 4.14 do not load with it.
+
+The executable still reports `gvr4.13.2.2-…`, because that is the last upstream tag.
 
 ## What you need
 
@@ -269,7 +271,7 @@ What was tested, October 2026:
 | Index controllers: move, turn, shoot, use, jump, crouch, weapon change, menus | works |
 | Brutal Doom v21 with Doom and Doom 2 | works |
 | Brutal Doom v21 with the `br_vr` 3D weapons | works |
-| LTP V7.0.1 liquid textures with real time reflections (`linux-openvr-4.14` only) | works |
+| LTP V7.0.1 liquid textures with real time reflections | works |
 | Loading a savegame from another mod combination | error message, no crash |
 | Exit | no crash |
 | 144 Hz without reprojection | reached, see below |
