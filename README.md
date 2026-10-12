@@ -1,11 +1,17 @@
 # GZDoomVR for Linux
 
-Classic Doom in VR, running natively on Linux with SteamVR.
+Play classic Doom in VR on Linux: a native Linux build of GZDoomVR for SteamVR (OpenVR),
+with a ready-made setup for Valve Index controllers. It runs without Proton or Wine.
 
 This is a fork of [GZDoomVR by hh79](https://github.com/hh79/gzdoomvr). Upstream is
 developed for Windows and provides Windows builds only. This fork adds what is needed to
 build and run it on Linux, a controller setup for Valve Index controllers, and fixes for
 crashes found along the way.
+
+- Doom and Doom 2 in the headset, with the weapon in your hand and thumbstick movement
+- Brutal Doom v21 with 3D weapon models, see [Mods](#mods)
+- a SteamVR binding and key layout for Index controllers that you can edit, see
+  [Controls](#controls)
 
 - **Building:** [LINUX.md](LINUX.md)
 - **Playing, controller layout, mods:** [linux/README.md](linux/README.md)
@@ -157,6 +163,22 @@ SteamVR version, the branch or build you used, what works and what does not. If 
 crashed, attach `gzdoomvr-crash.log` from the directory you started it in. For controller
 problems, the lines containing `gzdoomvr` from `~/.local/share/Steam/logs/vrserver.txt`
 show which binding SteamVR loaded.
+
+## Questions people ask
+
+- **Does GZDoomVR run on Linux?** Upstream only ships Windows builds. This fork builds
+  and runs natively on Linux; [LINUX.md](LINUX.md) has the steps.
+- **Do I need Proton or Wine?** No. The game is a native Linux program and talks to
+  SteamVR for Linux directly.
+- **Does it need SteamVR?** Yes. The game uses OpenVR, not OpenXR. Monado with an OpenVR
+  translation layer might work, but has not been tried.
+- **Which headsets work?** Only the Valve Index was tested. See
+  [Testers wanted](#testers-wanted) for everything else.
+- **Vulkan or OpenGL?** The VR renderer only exists for OpenGL.
+- **Is there a package or a download?** Not yet. There is no release and no AUR package;
+  you build from source, or take the AppImage from a workflow run (not yet tried in a
+  headset) as described
+  in [LINUX.md](LINUX.md#appimage).
 
 #
 Copyright (c) 1998-2024 ZDoom + GZDoom + GZDoomVR + QuestZDoom teams, and contributors
