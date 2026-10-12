@@ -92,10 +92,13 @@ Started once without problems, but not looked at closely:
 - [HDVRweapons.zip](https://github.com/hh79/gz3doom/files/4378108/HDVRweapons.zip), 3D
   weapon models for the original games by ajantaju
 
+- [Brutal Doom 64](https://www.moddb.com/mods/brutal-doom-64) v2 with its maps
+  (`bd64mapsV2.pk3`) and [BD64Weapons](https://github.com/dxt121730/BD64Weapons), the 3D
+  weapon pack by dxt121730. Played on the intro map only. BD64Weapons logs non-fatal
+  script errors in five of its model definitions.
+
 Listed by upstream and not tried here:
 
-- [BD64Weapons](https://github.com/dxt121730/BD64Weapons), weapon pack for Brutal Doom 64
-  by dxt121730
 - [Virtual Tactical Vest](https://github.com/iAmErmac/Virtual-Tactical-Vest), a virtual
   vest with weapon slots by iAmErmac
 - [Doom Neural Upscale 2X](https://www.moddb.com/downloads/doom-neural-upscale-2x),

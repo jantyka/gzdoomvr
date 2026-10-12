@@ -11,6 +11,7 @@ Files in this directory:
 | `steamvr_bindings/select_binding.sh` | Selects that binding in a running SteamVR. |
 | `index_controller.cfg` | Assigns game actions to those keys. Edit this one to change the layout. |
 | `index_controller_brutaldoom.cfg` | Additional assignments for Brutal Doom. |
+| `index_controller_brutaldoom64.cfg` | Additional assignments for Brutal Doom 64. |
 | `get-tested-mods.sh` | Fetches the weapon packs and checks the other tested mods, see [below](#3d-weapons-and-other-mods). |
 
 ## First start
