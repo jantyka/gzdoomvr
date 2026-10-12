@@ -273,6 +273,7 @@ What was tested, October 2026:
 | Brutal Doom v21 with the `br_vr` 3D weapons | works |
 | LTP V7.0.1 liquid textures with real time reflections | works |
 | Brutal Doom 64 v2 with its maps and the `BD64Weapons` 3D weapons | starts and plays; intro map only, weapon models not checked |
+| Voxel Doom II v2.4 with Doom 2, no other mods | starts and plays; MAP01 only |
 | Loading a savegame from another mod combination | error message, no crash |
 | Exit | no crash |
 | 144 Hz without reprojection | reached, see below |
