@@ -2784,6 +2784,33 @@ OptionMenu "OpenVROptions" protected
 	Slider "$VRPREFMNU_QUAKEHAPTIC",			vr_quake_haptic_level,					0, 1, 0.1, 2
 	StaticText ""
     Submenu "$VRHUDMNU_TITLE",	"VRHUDOptions"
+	Submenu "$VRWHEELMNU_TITLE",	"VRWheelOptions"
+}
+
+OptionValue "VRWheelItemAction"
+{
+	0, "$VRWHEELMNU_SELECT"
+	1, "$VRWHEELMNU_USE"
+}
+
+OptionMenu "VRWheelOptions" protected
+{
+	Title "$VRWHEELMNU_TITLE"
+
+	StaticText "$VRWHEELMNU_HELP1"
+	StaticText "$VRWHEELMNU_HELP2"
+	StaticText " "
+	Option "$VRWHEELMNU_ENABLED",				vr_wheel_enabled,						"OnOff"
+	Slider "$VRWHEELMNU_HOLDMS",				vr_wheel_hold_ms,						100, 1000, 50, 0
+	Option "$VRWHEELMNU_ITEMACTION",			vr_wheel_use_item,						"VRWheelItemAction"
+	Option "$VRWHEELMNU_FREEZE",				vr_wheel_freeze,						"OnOff"
+	StaticText " "
+	Slider "$VRWHEELMNU_SIZE",					vr_wheel_size,							0.1, 0.6, 0.05, 2
+	Slider "$VRWHEELMNU_HEIGHT",				vr_wheel_height,						0, 0.4, 0.05, 2
+	Slider "$VRWHEELMNU_ALPHA",					vr_wheel_alpha,							0.1, 1, 0.05, 2
+	StaticText " "
+	Control "$VRWHEELMNU_WEAPONKEY",			"+vr_weaponwheel"
+	Control "$VRWHEELMNU_ITEMKEY",				"+vr_itemwheel"
 }
 OptionMenu "ReverbEdit" protected
 {
