@@ -283,6 +283,12 @@ What was tested, October 2026:
 | LTP V7.0.1 liquid textures with real time reflections | works |
 | Brutal Doom 64 v2 with its maps and the `BD64Weapons` 3D weapons | starts and plays; intro map only, weapon models not checked |
 | Voxel Doom II v2.4 with Doom 2, no other mods | starts and plays; MAP01 only |
+| Heretic, original game | works |
+| Brutal Heretic RPG v6.5 with its HD textures, soundtrack and episode pack | starts and plays; E1M1 only, non-fatal script errors of the mod |
+| Weapon wheel (held right thumbstick click): Doom, Doom 2 and Heretic, with Brutal Doom and Brutal Heretic | works |
+| Item wheel (held left thumbstick click): Heretic and Brutal Heretic artifacts | works |
+| Short and held thumbstick clicks kept apart; tilting the stick while holding sends no stick keys (no kick or reload in Brutal Doom) | works |
+| Brutal Doom bindings: grenade on the right A button, alternate fire on the left trigger, dual wield on the held left thumbstick click | works |
 | Loading a savegame from another mod combination | error message, no crash |
 | Exit | no crash |
 | 144 Hz without reprojection | reached, see below |
@@ -306,6 +312,7 @@ Not tested yet:
 
 - Frame timing for the game without mods, and at 120 Hz.
 - Snap turning, left-handed setup, haptics.
+- The VR wheels with a left-handed setup and at 90 Hz.
 - Controllers other than the Index.
 - Any distribution other than Arch Linux.
 
