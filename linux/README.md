@@ -139,7 +139,7 @@ Brutal Doom file only changes a few keys and expects the rest to be set already:
 |---|---|
 | Right thumbstick forward | kick |
 | Right thumbstick back | reload |
-| Right thumbstick click | throw grenade |
+| Right A | throw grenade |
 | Left trigger | dual wield / special action (replaces alternate fire) |
 | Left trackpad (press) | offend |
 

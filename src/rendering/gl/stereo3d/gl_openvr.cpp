@@ -58,6 +58,7 @@
 #include "hwrenderer/scene/hw_drawinfo.h"
 
 #include "gl_openvr.h"
+#include "vr_wheel.h"
 #include "openvr_include.h"
 
 using namespace openvr;
@@ -1330,6 +1331,15 @@ namespace s3d
 	}
 
 
+	// Thumbstick click of one controller through the VR wheel filter, see vr_wheel.h.
+	static bool FilterWheelClick(EVRWheel wheel, VRControllerState_t& state, int stickAxis, bool clickAllowed)
+	{
+		bool clickDown = clickAllowed && (state.ulButtonPressed & ButtonMaskFromId(openvr::vr::k_EButton_Axis0));
+		float x = stickAxis != -1 ? state.rAxis[stickAxis].x : 0;
+		float y = stickAxis != -1 ? state.rAxis[stickAxis].y : 0;
+		return VR_FilterWheelClick(wheel, clickDown, x, y);
+	}
+
 	VRControllerState_t leftTrackedRemoteStateNew;
 	VRControllerState_t rightTrackedRemoteStateNew;
 
@@ -1372,6 +1382,30 @@ namespace s3d
 			triggerHeldFromMenu = true;
 		}
 		bool triggerBlockedNew = triggerHeldFromMenu;
+
+		// VR wheels: holding a thumbstick click opens the weapon wheel (weapon hand) or the item wheel
+		// (off hand), a short click arrives as RThumb/LThumb after the release. Clicks with grip held
+		// stay the _ALT keys. The keys below compare the filtered click with that of the last frame.
+		static bool dominantClickOld = false;
+		static bool offClickOld = false;
+		bool dominantClickNew = FilterWheelClick(VRWHEEL_Weapon, *pPrimaryTrackedRemoteNew, stickAxis, !dominantGripPushedNew);
+		bool offClickNew = FilterWheelClick(VRWHEEL_Item, *pSecondaryTrackedRemoteNew, stickAxis, !dominantGripPushedNew);
+
+		// While a wheel is open its stick only points at the wheel. A centred copy of the controller
+		// state takes the place of the real one for the stick keys below; lastState keeps the real one.
+		VRControllerState_t dominantWheelState, offWheelState;
+		if (stickAxis != -1 && VR_IsWheelOpen(VRWHEEL_Weapon))
+		{
+			dominantWheelState = *pPrimaryTrackedRemoteNew;
+			dominantWheelState.rAxis[stickAxis] = {};
+			pPrimaryTrackedRemoteNew = &dominantWheelState;
+		}
+		if (stickAxis != -1 && VR_IsWheelOpen(VRWHEEL_Item))
+		{
+			offWheelState = *pSecondaryTrackedRemoteNew;
+			offWheelState.rAxis[stickAxis] = {};
+			pSecondaryTrackedRemoteNew = &offWheelState;
+		}
 
 		if (menuNavigates)
 		{
@@ -1459,8 +1493,7 @@ namespace s3d
 		HandleVRButton(*pPrimaryTrackedRemoteOld, *pPrimaryTrackedRemoteNew, domButton2, KEY_PAD_B, 
 			!dominantGripPushedOld, !dominantGripPushedNew);
 		//Crouch
-		HandleVRButton(*pPrimaryTrackedRemoteOld, *pPrimaryTrackedRemoteNew, openvr::vr::k_EButton_Axis0, KEY_PAD_RTHUMB,
-			!dominantGripPushedOld, !dominantGripPushedNew);
+		Joy_GenerateButtonEvents(dominantClickOld, dominantClickNew, 1, KEY_PAD_RTHUMB);
 		//Fire
 		HandleVRButton(*pPrimaryTrackedRemoteOld, *pPrimaryTrackedRemoteNew, openvr::vr::k_EButton_Axis1, KEY_PAD_RTRIGGER, 
 			!dominantGripPushedOld && !triggerBlockedOld, !dominantGripPushedNew && !triggerBlockedNew);
@@ -1510,8 +1543,7 @@ namespace s3d
 			!dominantGripPushedOld, !dominantGripPushedNew);
 
 		//Inventory use
-		HandleVRButton(*pSecondaryTrackedRemoteOld, *pSecondaryTrackedRemoteNew, openvr::vr::k_EButton_Axis0, KEY_PAD_LTHUMB,
-			!dominantGripPushedOld, !dominantGripPushedNew);
+		Joy_GenerateButtonEvents(offClickOld, offClickNew, 1, KEY_PAD_LTHUMB);
 		//Alt fire
 		HandleVRButton(*pSecondaryTrackedRemoteOld, *pSecondaryTrackedRemoteNew, openvr::vr::k_EButton_Axis1, KEY_PAD_LTRIGGER,
 			!dominantGripPushedOld, !dominantGripPushedNew);
@@ -1539,6 +1571,8 @@ namespace s3d
 
 		pDominantTracking->lastState = *pDominantTrackedRemoteNew;
 		pOffTracking->lastState = *pOffTrackedRemoteNew;
+		dominantClickOld = dominantClickNew;
+		offClickOld = offClickNew;
 	}
 
 	// The controller models are not in the global Models array, so FlushModels() does not reach them.

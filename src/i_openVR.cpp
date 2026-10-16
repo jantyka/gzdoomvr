@@ -11,6 +11,7 @@
 #include "openvr_include.h"
 #include "menu.h"
 #include "i_openVR.h"
+#include "vr_wheel.h"
 
 using namespace openvr;
 
@@ -96,7 +97,8 @@ public:
 	float GetAxisValue(int i, VRControllerState_t& offState, VRControllerState_t& onState)
 	{
 		//joysticks should be disabled while menu is shown, otherwise player moves while scrolling menu
-		if (CurrentMenu == nullptr)
+		//The same while a VR wheel is open: then the stick of that hand chooses from the wheel.
+		if (CurrentMenu == nullptr && !VR_IsWheelOpen(Hands[i] == ON ? VRWHEEL_Weapon : VRWHEEL_Item))
 		{
 			VRControllerState_t& state = Hands[i] == ON ? onState : offState;
 			int axis = Sources[i] == PAD ? s3d::OpenVR_GetTouchPadAxis() : s3d::OpenVR_GetJoystickAxis();

@@ -1048,6 +1048,7 @@ set (PCH_SOURCES
 	rendering/swrenderer/textures/warptexture.cpp
 	rendering/swrenderer/textures/swcanvastexture.cpp
 	events.cpp
+	vr_wheel.cpp
 	launcher/launcherwindow.cpp
 	launcher/launcherbanner.cpp
 	launcher/launcherbuttonbar.cpp

@@ -45,10 +45,10 @@ weapon follows the right hand.
 | Trigger | fire | fire | confirm |
 | Thumbstick left / right | turn | turn | navigate |
 | Thumbstick forward / back | | kick / reload | navigate |
-| Thumbstick click | | throw grenade | |
+| Thumbstick click | | | |
 | Trackpad, upper / lower half (press) | next / previous weapon | next / previous weapon | |
 | B | use | use | confirm |
-| A | | | back |
+| A | | throw grenade | back |
 | Grip (squeeze, from half force) | jump | jump | |
 
 **Left controller**
