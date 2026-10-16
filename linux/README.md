@@ -92,7 +92,9 @@ their own: Options -> OpenVR Options -> VR Wheels.
 How long "held" takes is `vr_wheel_hold_ms` (250). Size, height above the hand and
 opacity are `vr_wheel_size`, `vr_wheel_height` (meters) and `vr_wheel_alpha`;
 `vr_wheel_freeze true` stops time while a wheel is open (single player only),
-`vr_wheel_use_item false` only selects the item instead of using it. On the desktop the
+`vr_wheel_use_item false` only selects the item instead of using it. `vr_wheel_items` is
+`2` by default: no item wheel in Doom and Chex Quest, which use items on pickup; there a
+held left click arrives as `LThumb_Alt` (bindable). `1` always, `0` never. On the desktop the
 wheels open with keys bound to `+vr_weaponwheel` and `+vr_itemwheel`, the mouse points.
 
 ## Changing the layout
@@ -157,7 +159,8 @@ Brutal Doom file only changes a few keys and expects the rest to be set already:
 | Right thumbstick forward | kick |
 | Right thumbstick back | reload |
 | Right A | throw grenade |
-| Left trigger | dual wield / special action (replaces alternate fire) |
+| Left trigger | alternate fire / aim |
+| Left thumbstick click, held | dual wield / special action |
 | Left trackpad (press) | offend |
 
 These commands only exist while Brutal Doom is loaded. To get the plain layout back, load

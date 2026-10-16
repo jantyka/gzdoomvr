@@ -57,21 +57,23 @@ weapon follows the right hand.
 |---|---|---|---|
 | Thumbstick | move and strafe | move and strafe | navigate |
 | Thumbstick click, short | switch always-run on and off | switch always-run on and off | |
-| Thumbstick click, held | item wheel | item wheel | |
-| Trigger | alternate fire | dual wield / special action | |
+| Thumbstick click, held | item wheel (not in Doom) | dual wield / special action | |
+| Trigger | alternate fire | alternate fire / aim | |
 | Trackpad (press) | | offend | |
 | A | open the menu | open the menu | |
 | B | automap | automap | |
 | Grip (squeeze, from half force) | crouch while held | crouch while held | |
 
-Empty cells are not assigned. With Brutal Doom alternate fire has no button.
+Empty cells are not assigned.
 
 **Weapon and item wheels.** Hold the thumbstick click of the right hand: a wheel with one
 segment per weapon slot appears above the weapon. Point the stick at a segment and let go
 to switch; let go with the stick in the middle to cancel. If a slot holds several weapons,
 the trigger cycles through them while the wheel is open. The left thumbstick click opens
 the same kind of wheel for inventory items (Heretic's artifacts, items from mods) and uses
-the chosen one. A short click does what it did before. Turning (right) and moving (left)
+the chosen one. Doom uses its items on pickup, so there is no item wheel in Doom
+(`vr_wheel_items`); a held left click arrives as `LThumb_Alt` instead, which the Brutal Doom
+bindings use for dual wield. A short click does what it did before. Turning (right) and moving (left)
 pause while a wheel is open. Settings, including an off switch for mods with a wheel of
 their own: Options -> OpenVR Options -> VR Wheels.
 

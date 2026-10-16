@@ -36,10 +36,18 @@ enum EVRWheel
 	NUM_VRWHEELS
 };
 
+// What the key bindings see of a thumbstick click, as bits.
+enum EVRWheelClick
+{
+	VRCLICK_Short = 1,	// RThumb/LThumb: a short click, sent briefly after the release
+	VRCLICK_Held = 2,	// RThumb_Alt/LThumb_Alt: held while the wheel is off for this game
+};
+
 // Feeds the thumbstick click and the stick position of the hand that owns the wheel. Call it
-// once per frame. Returns the click state the key bindings should see: a short click arrives
-// after the release as a brief press, a long one opens the wheel and never reaches them.
-bool VR_FilterWheelClick(EVRWheel wheel, bool clickDown, float stickX, float stickY);
+// once per frame. Returns EVRWheelClick bits: a short click arrives after the release as a
+// brief press, a long one opens the wheel. If the wheel is off for this game (the item wheel
+// in Doom by default), a long click is held as the _Alt key instead, so it can be bound.
+int VR_FilterWheelClick(EVRWheel wheel, bool clickDown, float stickX, float stickY);
 
 // True while the wheel is open. The stick of its hand must then neither turn nor move the player.
 bool VR_IsWheelOpen(EVRWheel wheel);

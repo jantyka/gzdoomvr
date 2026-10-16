@@ -34,9 +34,12 @@
 #include "menustate.h"
 #include "vm.h"
 #include "v_draw.h"
+#include "gi.h"
 
 CVAR(Bool, vr_wheel_enabled, true, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
 CVAR(Int, vr_wheel_hold_ms, 250, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
+// Item wheel: 0 = off, 1 = on, 2 = off in Doom and Chex Quest, whose items are used on pickup
+CVAR(Int, vr_wheel_items, 2, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
 // Read by zscript/ui/vr_wheel.zs
 CVAR(Float, vr_wheel_alpha, 0.85f, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
 // Read by gl_openvr.cpp: wheel diameter and height above the hand, in meters
@@ -51,6 +54,7 @@ enum EWheelState
 	WS_PassThrough,	// click that began while no wheel could open, reaches the bindings unchanged
 	WS_Pending,		// click held, not yet long enough to open the wheel
 	WS_ShortClick,	// short click released, now sent to the bindings as a brief press
+	WS_HeldKey,		// long click while the wheel is off for this game, sent as the _Alt key
 	WS_Open,
 	WS_Releasing,	// click let go, the wheel waits a moment in case the click comes back
 	WS_Released,	// selection is ready for ZScript to pick up
@@ -78,13 +82,22 @@ static bool WheelCanOpen()
 	return vr_wheel_enabled && gamestate == GS_LEVEL && menuactive == MENU_Off && ConsoleState == c_up && !paused;
 }
 
+static bool WheelInGame(EVRWheel wheel)
+{
+	if (wheel == VRWHEEL_Weapon || vr_wheel_items == 1)
+	{
+		return true;
+	}
+	return vr_wheel_items == 2 && !(gameinfo.gametype & GAME_DoomChex);
+}
+
 bool VR_IsWheelOpen(EVRWheel wheel)
 {
 	auto state = Wheels[wheel].State;
 	return state == WS_Open || state == WS_Releasing;
 }
 
-bool VR_FilterWheelClick(EVRWheel wheel, bool clickDown, float stickX, float stickY)
+int VR_FilterWheelClick(EVRWheel wheel, bool clickDown, float stickX, float stickY)
 {
 	auto &w = Wheels[wheel];
 	uint64_t now = I_msTime();
@@ -101,59 +114,72 @@ bool VR_FilterWheelClick(EVRWheel wheel, bool clickDown, float stickX, float sti
 	case WS_Released:	// a new click drops a selection that ZScript never picked up
 		if (!clickDown)
 		{
-			return false;
+			return 0;
 		}
 		w.State = WheelCanOpen() ? WS_Pending : WS_PassThrough;
 		w.Time = now;
-		return w.State == WS_PassThrough;
+		return w.State == WS_PassThrough ? VRCLICK_Short : 0;
 
 	case WS_PassThrough:
 		if (!clickDown)
 		{
 			w.State = WS_Idle;
 		}
-		return clickDown;
+		return clickDown ? VRCLICK_Short : 0;
 
 	case WS_Pending:
 		if (!clickDown)
 		{
 			w.State = WS_ShortClick;
 			w.Time = now;
-			return true;
+			return VRCLICK_Short;
 		}
 		if (vr_wheel_hold_ms <= 0 || now - w.Time >= (uint64_t)*vr_wheel_hold_ms)
 		{
+			if (!WheelInGame(wheel))
+			{
+				w.State = WS_HeldKey;
+				return VRCLICK_Held;
+			}
 			w.State = WS_Open;
 			w.FromCommand = false;
 			w.Time = now;
 		}
 		w.X = stickX;
 		w.Y = stickY;
-		return false;
+		return 0;
 
 	case WS_ShortClick:
 		if (now - w.Time < SHORT_CLICK_MS)
 		{
-			return true;
+			return VRCLICK_Short;
 		}
 		w.State = WS_Idle;
-		return false;
+		return 0;
+
+	case WS_HeldKey:
+		if (!clickDown)
+		{
+			w.State = WS_Idle;
+			return 0;
+		}
+		return VRCLICK_Held;
 
 	case WS_Open:
 		if (w.FromCommand)
 		{
-			return false;
+			return 0;
 		}
 		if (!clickDown)
 		{
 			// X and Y stay as they are now: the stick position at release decides.
 			w.State = WS_Releasing;
 			w.Time = now;
-			return false;
+			return 0;
 		}
 		w.X = stickX;
 		w.Y = stickY;
-		return false;
+		return 0;
 
 	case WS_Releasing:
 		if (clickDown)
@@ -164,9 +190,9 @@ bool VR_FilterWheelClick(EVRWheel wheel, bool clickDown, float stickX, float sti
 		{
 			w.State = WS_Released;
 		}
-		return false;
+		return 0;
 	}
-	return false;
+	return 0;
 }
 
 // Desktop and keyboard players: hold a key bound to +vr_weaponwheel or +vr_itemwheel to open a
@@ -175,7 +201,7 @@ bool VR_FilterWheelClick(EVRWheel wheel, bool clickDown, float stickX, float sti
 static void OpenWheelFromCommand(EVRWheel wheel)
 {
 	auto &w = Wheels[wheel];
-	if (w.State != WS_Open && WheelCanOpen())
+	if (w.State != WS_Open && WheelCanOpen() && WheelInGame(wheel))
 	{
 		w.State = WS_Open;
 		w.FromCommand = true;

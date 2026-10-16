@@ -2787,6 +2787,13 @@ OptionMenu "OpenVROptions" protected
 	Submenu "$VRWHEELMNU_TITLE",	"VRWheelOptions"
 }
 
+OptionValue "VRWheelItems"
+{
+	0, "$OPTVAL_OFF"
+	1, "$OPTVAL_ON"
+	2, "$VRWHEELMNU_ITEMSAUTO"
+}
+
 OptionValue "VRWheelItemAction"
 {
 	0, "$VRWHEELMNU_SELECT"
@@ -2802,6 +2809,7 @@ OptionMenu "VRWheelOptions" protected
 	StaticText " "
 	Option "$VRWHEELMNU_ENABLED",				vr_wheel_enabled,						"OnOff"
 	Slider "$VRWHEELMNU_HOLDMS",				vr_wheel_hold_ms,						100, 1000, 50, 0
+	Option "$VRWHEELMNU_ITEMS",					vr_wheel_items,							"VRWheelItems"
 	Option "$VRWHEELMNU_ITEMACTION",			vr_wheel_use_item,						"VRWheelItemAction"
 	Option "$VRWHEELMNU_FREEZE",				vr_wheel_freeze,						"OnOff"
 	StaticText " "

@@ -1456,12 +1456,12 @@ namespace s3d
 
 	// Thumbstick click of one controller through the VR wheel filter, see vr_wheel.h.
 	// Linux: like the other input additions, Windows keeps the plain click.
-	static bool FilterWheelClick(EVRWheel wheel, VRControllerState_t& state, int stickAxis, bool clickAllowed)
+	static int FilterWheelClick(EVRWheel wheel, VRControllerState_t& state, int stickAxis, bool clickAllowed)
 	{
 		bool clickDown = clickAllowed && (state.ulButtonPressed & ButtonMaskFromId(openvr::vr::k_EButton_Axis0));
 		if (!linuxInputAdditions)
 		{
-			return clickDown;
+			return clickDown ? VRCLICK_Short : 0;
 		}
 		float x = stickAxis != -1 ? state.rAxis[stickAxis].x : 0;
 		float y = stickAxis != -1 ? state.rAxis[stickAxis].y : 0;
@@ -1514,10 +1514,10 @@ namespace s3d
 		// VR wheels: holding a thumbstick click opens the weapon wheel (weapon hand) or the item wheel
 		// (off hand), a short click arrives as RThumb/LThumb after the release. Clicks with grip held
 		// stay the _ALT keys. The keys below compare the filtered click with that of the last frame.
-		static bool dominantClickOld = false;
-		static bool offClickOld = false;
-		bool dominantClickNew = FilterWheelClick(VRWHEEL_Weapon, *pPrimaryTrackedRemoteNew, stickAxis, !dominantGripPushedNew);
-		bool offClickNew = FilterWheelClick(VRWHEEL_Item, *pSecondaryTrackedRemoteNew, stickAxis, !dominantGripPushedNew);
+		static int dominantClickOld = 0;
+		static int offClickOld = 0;
+		int dominantClickNew = FilterWheelClick(VRWHEEL_Weapon, *pPrimaryTrackedRemoteNew, stickAxis, !dominantGripPushedNew);
+		int offClickNew = FilterWheelClick(VRWHEEL_Item, *pSecondaryTrackedRemoteNew, stickAxis, !dominantGripPushedNew);
 
 		// While a wheel is open its stick only points at the wheel. A centred copy of the controller
 		// state takes the place of the real one for the stick keys below; lastState keeps the real one.
@@ -1621,7 +1621,8 @@ namespace s3d
 		HandleVRButton(*pPrimaryTrackedRemoteOld, *pPrimaryTrackedRemoteNew, domButton2, KEY_PAD_B, 
 			!dominantGripPushedOld, !dominantGripPushedNew);
 		//Crouch
-		Joy_GenerateButtonEvents(dominantClickOld, dominantClickNew, 1, KEY_PAD_RTHUMB);
+		static const int dominantClickKeys[] = { KEY_PAD_RTHUMB, KEY_PAD_RTHUMB_ALT };	// EVRWheelClick bits
+		Joy_GenerateButtonEvents(dominantClickOld, dominantClickNew, 2, dominantClickKeys);
 		//Fire
 		HandleVRButton(*pPrimaryTrackedRemoteOld, *pPrimaryTrackedRemoteNew, openvr::vr::k_EButton_Axis1, KEY_PAD_RTRIGGER, 
 			!dominantGripPushedOld && !triggerBlockedOld, !dominantGripPushedNew && !triggerBlockedNew);
@@ -1671,7 +1672,8 @@ namespace s3d
 			!dominantGripPushedOld, !dominantGripPushedNew);
 
 		//Inventory use
-		Joy_GenerateButtonEvents(offClickOld, offClickNew, 1, KEY_PAD_LTHUMB);
+		static const int offClickKeys[] = { KEY_PAD_LTHUMB, KEY_PAD_LTHUMB_ALT };	// EVRWheelClick bits
+		Joy_GenerateButtonEvents(offClickOld, offClickNew, 2, offClickKeys);
 		//Alt fire
 		HandleVRButton(*pSecondaryTrackedRemoteOld, *pSecondaryTrackedRemoteNew, openvr::vr::k_EButton_Axis1, KEY_PAD_LTRIGGER,
 			!dominantGripPushedOld, !dominantGripPushedNew);
