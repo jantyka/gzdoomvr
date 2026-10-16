@@ -1455,9 +1455,14 @@ namespace s3d
 
 
 	// Thumbstick click of one controller through the VR wheel filter, see vr_wheel.h.
+	// Linux: like the other input additions, Windows keeps the plain click.
 	static bool FilterWheelClick(EVRWheel wheel, VRControllerState_t& state, int stickAxis, bool clickAllowed)
 	{
 		bool clickDown = clickAllowed && (state.ulButtonPressed & ButtonMaskFromId(openvr::vr::k_EButton_Axis0));
+		if (!linuxInputAdditions)
+		{
+			return clickDown;
+		}
 		float x = stickAxis != -1 ? state.rAxis[stickAxis].x : 0;
 		float y = stickAxis != -1 ? state.rAxis[stickAxis].y : 0;
 		return VR_FilterWheelClick(wheel, clickDown, x, y);
