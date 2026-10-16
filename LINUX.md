@@ -240,6 +240,15 @@ tested on Windows:
 - The weapon hand system button arrives as `Pad_Start`.
 - The upper and lower half of the Index trackpads arrive as `DPadUp`/`DPadDown` (weapon
   hand) and `DPadLeft`/`DPadRight` (off hand). Index controllers only.
+- Holding a thumbstick click opens the weapon wheel (weapon hand) or the item wheel (off
+  hand); a short click arrives as `RThumb`/`LThumb` after the release.
+
+VR wheels, on all platforms apart from the controller input above: `src/vr_wheel.cpp`
+keeps the input state, `wadsrc/static/zscript/ui/vr_wheel.zs` fills, draws and selects.
+2D draw commands can carry a VR layer (`EVR2DLayer`); `FGLRenderer::Flush` draws the hand
+layers per eye with a projection from the hand (`OpenVREyePose::AdjustHandOverlay`).
+Outside VR they are ordinary 2D. Shape2D fill colors in this engine have red and blue
+swapped, the wheel uses colors where that does not matter.
 
 Other:
 

@@ -45,7 +45,7 @@ weapon follows the right hand.
 | Trigger | fire | fire | confirm |
 | Thumbstick left / right | turn | turn | navigate |
 | Thumbstick forward / back | | kick / reload | navigate |
-| Thumbstick click | | | |
+| Thumbstick click, held | weapon wheel | weapon wheel | |
 | Trackpad, upper / lower half (press) | next / previous weapon | next / previous weapon | |
 | B | use | use | confirm |
 | A | | throw grenade | back |
@@ -56,15 +56,24 @@ weapon follows the right hand.
 | Input | In the game | With Brutal Doom | In menus |
 |---|---|---|---|
 | Thumbstick | move and strafe | move and strafe | navigate |
-| Thumbstick click | switch always-run on and off | switch always-run on and off | |
+| Thumbstick click, short | switch always-run on and off | switch always-run on and off | |
+| Thumbstick click, held | item wheel | item wheel | |
 | Trigger | alternate fire | dual wield / special action | |
 | Trackpad (press) | | offend | |
 | A | open the menu | open the menu | |
 | B | automap | automap | |
 | Grip (squeeze, from half force) | crouch while held | crouch while held | |
 
-Empty cells are not assigned. Using an inventory item has no button in this layout, and
-with Brutal Doom neither has alternate fire.
+Empty cells are not assigned. With Brutal Doom alternate fire has no button.
+
+**Weapon and item wheels.** Hold the thumbstick click of the right hand: a wheel with one
+segment per weapon slot appears above the weapon. Point the stick at a segment and let go
+to switch; let go with the stick in the middle to cancel. If a slot holds several weapons,
+the trigger cycles through them while the wheel is open. The left thumbstick click opens
+the same kind of wheel for inventory items (Heretic's artifacts, items from mods) and uses
+the chosen one. A short click does what it did before. Turning (right) and moving (left)
+pause while a wheel is open. Settings, including an off switch for mods with a wheel of
+their own: Options -> OpenVR Options -> VR Wheels.
 
 Every assignment can be changed:
 
@@ -139,6 +148,10 @@ GZDoomVR is a VR fork of [GZDoom](https://github.com/ZDoom/gzdoom), based on
 by Fishbiter and [QuestZDoom](https://github.com/DrBeef/QuestZDoom) by DrBeef, and
 maintained by hh79. The Linux work in this fork is a comparatively small addition on top
 of theirs.
+
+The weapon and item wheels follow the approach of [Gearbox](https://github.com/mmaulwurff/gearbox)
+by Alexander Kromm (m8f), GPLv3: how weapons are found through the weapon slots, which icon
+is shown and how the choice is sent. The code is written for VR and not copied from it.
 
 ## Testers wanted
 

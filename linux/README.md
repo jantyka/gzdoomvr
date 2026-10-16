@@ -57,7 +57,8 @@ This is the layout from `index_controller.cfg`, for a right-handed setup.
 |---|---|---|
 | Trigger | fire | confirm |
 | Thumbstick left/right | turn | navigate |
-| Thumbstick click | not assigned | |
+| Thumbstick click, short | not assigned | |
+| Thumbstick click, held | weapon wheel | |
 | Trackpad, upper half (press) | next weapon | |
 | Trackpad, lower half (press) | previous weapon | |
 | B | use | confirm |
@@ -71,12 +72,28 @@ This is the layout from `index_controller.cfg`, for a right-handed setup.
 | Thumbstick | move and strafe | navigate |
 | Trigger | alternate fire | |
 | Grip (squeeze, from half force) | crouch while held | |
-| Thumbstick click | switch always-run on and off | |
+| Thumbstick click, short | switch always-run on and off | |
+| Thumbstick click, held | item wheel | |
 | A | open the menu | |
 | B | automap | |
 | Trackpad | not assigned | |
 
-The weapon follows the right hand. Using an inventory item has no button in this layout.
+The weapon follows the right hand.
+
+**Weapon and item wheels.** Hold the thumbstick click of the right hand: a wheel with one
+segment per weapon slot appears above the weapon. Point the stick at a segment and let go
+to switch; let go with the stick in the middle to cancel. If a slot holds several weapons,
+the trigger cycles through them while the wheel is open. The left thumbstick click opens
+the same kind of wheel for inventory items (Heretic's artifacts, items from mods) and uses
+the chosen one. A short click does what it did before. Turning (right) and moving (left)
+pause while a wheel is open. Settings, including an off switch for mods with a wheel of
+their own: Options -> OpenVR Options -> VR Wheels.
+
+How long "held" takes is `vr_wheel_hold_ms` (250). Size, height above the hand and
+opacity are `vr_wheel_size`, `vr_wheel_height` (meters) and `vr_wheel_alpha`;
+`vr_wheel_freeze true` stops time while a wheel is open (single player only),
+`vr_wheel_use_item false` only selects the item instead of using it. On the desktop the
+wheels open with keys bound to `+vr_weaponwheel` and `+vr_itemwheel`, the mouse points.
 
 ## Changing the layout
 
