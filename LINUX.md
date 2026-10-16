@@ -326,6 +326,15 @@ Not tested yet:
   back to the system MIDI device.
 - GNOME logs `Client provided invalid window geometry` when the window is created. No
   visible effect was noticed.
+- VR wheels, `vr_wheel_freeze true` (off by default): it uses the level freeze. A game
+  saved while a wheel is open, for example with quicksave, loads frozen until a wheel is
+  opened and closed again, and closing a wheel also ends a freeze that something else
+  started, such as a time freeze power-up.
+- VR wheels with `vr_alternate_mappings true`: `RThumb_Alt`/`LThumb_Alt` come both from a
+  held thumbstick click and from grip + click. Pressing grip during a held click can run
+  the bound command twice, and grip pressed while a wheel is open counts as letting go.
+- VR wheels: a controller that loses tracking keeps its last pose, so its wheel stays where
+  the hand was last seen.
 - `AppImageBuilder.yml` is the unchanged upstream GZDoom template and is not used. The
   AppImage of this fork is built by `.github/workflows/appimage.yml`.
 
