@@ -32,9 +32,14 @@
 #include "i_interface.h"
 #include "gamestate.h"
 #include "menustate.h"
+#include "vm.h"
 
 CVAR(Bool, vr_wheel_enabled, true, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
 CVAR(Int, vr_wheel_hold_ms, 250, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
+// Read by zscript/ui/vr_wheel.zs
+CVAR(Float, vr_wheel_alpha, 0.85f, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
+CVAR(Bool, vr_wheel_freeze, false, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)	// stop time while a wheel is open (single player)
+CVAR(Bool, vr_wheel_use_item, true, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)	// false: the item wheel only selects
 
 enum EWheelState
 {
@@ -188,3 +193,52 @@ static FConsoleCommand WeaponWheelDown("+vr_weaponwheel", [](FCommandLine &, int
 static FConsoleCommand WeaponWheelUp("-vr_weaponwheel", [](FCommandLine &, int) { ReleaseWheelFromCommand(VRWHEEL_Weapon); });
 static FConsoleCommand ItemWheelDown("+vr_itemwheel", [](FCommandLine &, int) { OpenWheelFromCommand(VRWHEEL_Item); });
 static FConsoleCommand ItemWheelUp("-vr_itemwheel", [](FCommandLine &, int) { ReleaseWheelFromCommand(VRWHEEL_Item); });
+
+//==========================================================================
+//
+// ZScript interface (struct VRWheel in zscript/ui/vr_wheel.zs)
+//
+//==========================================================================
+
+static FVRWheel &CheckWheel(int wheel)
+{
+	if ((unsigned)wheel >= NUM_VRWHEELS)
+	{
+		ThrowAbortException(X_ARRAY_OUT_OF_BOUNDS, "VRWheel: wheel %d does not exist", wheel);
+	}
+	return Wheels[wheel];
+}
+
+// 0 = closed, 1 = open, 2 = just released. The release is reported once, then the wheel is closed.
+DEFINE_ACTION_FUNCTION(_VRWheel, Poll)
+{
+	PARAM_PROLOGUE;
+	PARAM_INT(wheel);
+	auto &w = CheckWheel(wheel);
+	int result = 0;
+	if (VR_IsWheelOpen(EVRWheel(wheel)))
+	{
+		result = 1;
+	}
+	else if (w.State == WS_Released)
+	{
+		w.State = WS_Idle;
+		result = 2;
+	}
+	ACTION_RETURN_INT(result);
+}
+
+DEFINE_ACTION_FUNCTION(_VRWheel, GetStick)
+{
+	PARAM_PROLOGUE;
+	PARAM_INT(wheel);
+	auto &w = CheckWheel(wheel);
+	ACTION_RETURN_VEC2(DVector2(w.X, w.Y));
+}
+
+DEFINE_ACTION_FUNCTION(_VRWheel, FromCommand)
+{
+	PARAM_PROLOGUE;
+	PARAM_INT(wheel);
+	ACTION_RETURN_BOOL(CheckWheel(wheel).FromCommand);
+}
