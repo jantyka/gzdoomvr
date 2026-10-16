@@ -130,6 +130,9 @@ void Draw2D(F2DDrawer* drawer, FRenderState& state, int x, int y, int width, int
 
 			if (!cmd.mOutside2D && outside2D)
 				continue;
+
+			if (cmd.mVRLayer != drawer->mVRDrawLayer)
+				continue;
 		}
 		
 		int gltrans = -1;

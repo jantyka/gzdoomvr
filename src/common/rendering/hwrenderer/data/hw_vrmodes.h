@@ -41,6 +41,8 @@ struct VREyeInfo
 	virtual void TearDown() const { m_isActive = false; }
 	virtual void AdjustHud() const {}
 	virtual void AdjustBlend(HWDrawInfo* di) const {}
+	// Projection for 2D commands of a hand layer (EVR2DLayer). False if that hand is not tracked.
+	virtual bool AdjustHandOverlay(int layer) const { return false; }
 	bool isActive() const { return m_isActive; }
 
 private:

@@ -50,6 +50,9 @@ struct VRWheel native
 	native ui static Vector2 GetStick(int wheel);
 	// Opened by +vr_weaponwheel/+vr_itemwheel: the direction then comes from the mouse.
 	native ui static bool FromCommand(int wheel);
+	// In VR, what is drawn in between appears at the hand of the wheel.
+	native ui static void BeginHandDraw(int wheel);
+	native ui static void EndHandDraw();
 }
 
 // One segment of a wheel. Weapon segments hold every weapon of one slot, item segments one item.
@@ -175,7 +178,9 @@ class VRWheelHandler : StaticEventHandler
 			if (st.Hover >= 0) SendChoice(wheel, st.Entries[st.Hover].Current());
 			return;
 		}
+		VRWheel.BeginHandDraw(wheel);
 		Draw(st, wheel);
+		VRWheel.EndHandDraw();
 	}
 
 	private ui void Open(VRWheelState st)
@@ -311,8 +316,10 @@ class VRWheelHandler : StaticEventHandler
 			if (i == st.Hover) AddSector(hoverSegment, 0, center, inner, outer, i * size - size / 2, size);
 			else vertices = AddSector(segments, vertices, center, inner, outer, i * size - size / 2, size);
 		}
+		// Red and blue are equal on purpose: DrawShapeFill swaps them in VR builds (its buffers
+		// skip the BGRA to RGBA swap in Draw2D).
 		Screen.DrawShapeFill(Color(70, 70, 70), alpha * 0.8, segments);
-		if (st.Hover >= 0) Screen.DrawShapeFill(Color(210, 150, 30), alpha * 0.9, hoverSegment);
+		if (st.Hover >= 0) Screen.DrawShapeFill(Color(60, 170, 60), alpha * 0.9, hoverSegment);
 		segments.Destroy();
 		hoverSegment.Destroy();
 

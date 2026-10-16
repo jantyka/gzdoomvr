@@ -60,6 +60,7 @@ public:
 	DVector3 GetViewShift(FLOATTYPE yaw) const override;
 	virtual void AdjustHud() const override;
 	virtual void AdjustBlend(HWDrawInfo* di) const override;
+	virtual bool AdjustHandOverlay(int layer) const override;
 
 	void initialize(openvr::VR_IVRSystem_FnTable * vrsystem);
 	void dispose();

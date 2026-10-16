@@ -61,6 +61,14 @@ enum class SpecialDrawCommand {
 	ClearStencil,
 };
 
+enum EVR2DLayer : uint8_t
+{
+	VR2D_Screen,
+	VR2D_WeaponHand,
+	VR2D_OffHand,
+	NUM_VR2DLAYERS
+};
+
 class F2DDrawer
 {
 public:
@@ -142,6 +150,7 @@ public:
 		uint8_t mFlags;
 		//When a render command should run in VR on the whole screen, not just center qued used for 2D rendering. Used e.g. for nightvision
 		bool mOutside2D = false;
+		uint8_t mVRLayer;	// EVR2DLayer
 		float mScreenFade;
 
 		bool useTransform;
@@ -179,6 +188,7 @@ public:
 				mColor1.d == other.mColor1.d &&
 				useTransform == other.useTransform &&
 				mScreenFade == other.mScreenFade &&
+				mVRLayer == other.mVRLayer &&
 				(
 					!useTransform ||
 					(
@@ -275,6 +285,13 @@ public:
 	}
 
 	bool mIsFirstPass = true;
+
+	// VR: commands added while mVRLayer is not VR2D_Screen are drawn in a pass of their own with
+	// the projection of a hand (FGLRenderer::Flush), for the VR wheels. Outside VR they are
+	// ordinary 2D.
+	uint8_t mVRLayer = 0;
+	uint8_t mVRDrawLayer = 0;	// layer the running Draw2D pass draws
+	bool mVRLayersUsed = false;	// any command outside VR2D_Screen since the last Clear()
 };
 
 // DCanvas is already taken so using FCanvas instead.

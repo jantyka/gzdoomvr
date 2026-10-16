@@ -222,6 +222,8 @@ DEFINE_ACTION_FUNCTION_NATIVE(DShape2D, PushTriangle, Shape2D_PushTriangle)
 int F2DDrawer::AddCommand(RenderCommand *data) 
 {
 	data->mScreenFade = screenFade;
+	data->mVRLayer = mVRLayer;
+	mVRLayersUsed |= mVRLayer != VR2D_Screen;
 	if (mData.Size() > 0 && data->isCompatible(mData.Last()))
 	{
 		// Merge with the last command.
@@ -1203,6 +1205,7 @@ void F2DDrawer::Clear()
 		mIndices.Clear();
 		mData.Clear();
 		mIsFirstPass = true;
+		mVRLayersUsed = false;
 	}
 	screenFade = 1.f;
 }

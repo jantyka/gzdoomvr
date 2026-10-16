@@ -149,6 +149,8 @@ EXTERN_CVAR(Float, vr_floor_offset)
 EXTERN_CVAR(Float, vr_ipd);
 
 EXTERN_CVAR(Bool, openvr_rightHanded)
+EXTERN_CVAR(Float, vr_wheel_size)
+EXTERN_CVAR(Float, vr_wheel_height)
 EXTERN_CVAR(Bool, openvr_moveFollowsOffHand)
 EXTERN_CVAR(Bool, vr_snap_turn);
 EXTERN_CVAR(Bool, openvr_drawControllers)
@@ -923,6 +925,127 @@ namespace s3d
 		{
 			di->EndDrawInfo();
 		}
+	}
+
+	// Row-major 4x4 matrix for the hand overlay below. The overlay is computed in OpenVR's
+	// tracking space (meters, Y up) from the poses as OpenVR delivers them, which keeps it
+	// apart from the Doom-space conventions of the other matrices in this file.
+	struct HandOverlayMatrix
+	{
+		double m[4][4] = {};
+
+		static HandOverlayMatrix FromHmd(const HmdMatrix34_t& pose)
+		{
+			HandOverlayMatrix r;
+			for (int i = 0; i < 3; i++)
+				for (int j = 0; j < 4; j++)
+					r.m[i][j] = pose.m[i][j];
+			r.m[3][3] = 1;
+			return r;
+		}
+
+		// Inverse of a rotation plus translation, as all OpenVR poses are.
+		HandOverlayMatrix RigidInverse() const
+		{
+			HandOverlayMatrix r;
+			for (int i = 0; i < 3; i++)
+			{
+				for (int j = 0; j < 3; j++)
+					r.m[i][j] = m[j][i];
+				r.m[i][3] = -(m[0][i] * m[0][3] + m[1][i] * m[1][3] + m[2][i] * m[2][3]);
+			}
+			r.m[3][3] = 1;
+			return r;
+		}
+
+		HandOverlayMatrix operator*(const HandOverlayMatrix& o) const
+		{
+			HandOverlayMatrix r;
+			for (int i = 0; i < 4; i++)
+				for (int j = 0; j < 4; j++)
+					for (int k = 0; k < 4; k++)
+						r.m[i][j] += m[i][k] * o.m[k][j];
+			return r;
+		}
+
+		DVector3 Column(int j) const { return DVector3(m[0][j], m[1][j], m[2][j]); }
+	};
+
+	// Wheel radius as part of SCREENHEIGHT, the value VRWheelHandler.SCREEN_RADIUS in
+	// zscript/ui/vr_wheel.zs draws with.
+	static const double VRWHEEL_SCREEN_RADIUS = 0.4;
+
+	// Places the 2D commands of a VR wheel (pixels around the screen centre) vr_wheel_height
+	// meters above the hand, vr_wheel_size meters across, turned towards the head so it stays
+	// readable however the hand is held.
+	bool OpenVREyePose::AdjustHandOverlay(int layer) const
+	{
+		int hand = (layer == VR2D_WeaponHand) == openvr_rightHanded ? 1 : 0;
+		const Controller& controller = controllers[hand];
+		if (!controller.active || !controller.pose.bPoseIsValid || currentPose == nullptr || !currentPose->bPoseIsValid)
+		{
+			return false;
+		}
+
+		auto head = HandOverlayMatrix::FromHmd(currentPose->mDeviceToAbsoluteTracking);
+		DVector3 headPos = head.Column(3);
+		DVector3 center = HandOverlayMatrix::FromHmd(controller.pose.mDeviceToAbsoluteTracking).Column(3) + DVector3(0, vr_wheel_height, 0);
+
+		DVector3 view = center - headPos;
+		if (view.Length() < 0.01)
+		{
+			return false;
+		}
+		view.MakeUnit();
+		DVector3 right = view ^ DVector3(0, 1, 0);
+		if (right.Length() < 0.01)
+		{
+			// Looking straight down at the hand: the head decides what is "right".
+			right = head.Column(0);
+		}
+		right.MakeUnit();
+		DVector3 up = right ^ view;
+
+		double metersPerPixel = vr_wheel_size / (2 * VRWHEEL_SCREEN_RADIUS * SCREENHEIGHT);
+		DVector3 origin = center - right * (metersPerPixel * SCREENWIDTH / 2) + up * (metersPerPixel * SCREENHEIGHT / 2);
+		HandOverlayMatrix overlay;
+		for (int i = 0; i < 3; i++)
+		{
+			overlay.m[i][0] = right[i] * metersPerPixel;
+			overlay.m[i][1] = -up[i] * metersPerPixel;	// pixel rows go down
+			overlay.m[i][2] = -view[i];
+			overlay.m[i][3] = origin[i];
+		}
+		overlay.m[3][3] = 1;
+
+		// eyeToHeadTransform and projectionMatrix were loaded from row-major OpenVR data, so the
+		// first is stored transposed and the second as a regular column-major GL matrix.
+		HandOverlayMatrix eyeToHead, projection, units;
+		const FLOATTYPE* e2h = eyeToHeadTransform.get();
+		const FLOATTYPE* proj = projectionMatrix.get();
+		for (int i = 0; i < 4; i++)
+		{
+			for (int j = 0; j < 4; j++)
+			{
+				eyeToHead.m[i][j] = e2h[i * 4 + j];
+				projection.m[i][j] = proj[j * 4 + i];
+			}
+		}
+		// The projection's near plane is 5 Doom units, so meters are scaled first.
+		units.m[0][0] = units.m[1][1] = units.m[2][2] = vr_vunits_per_meter;
+		units.m[3][3] = 1;
+
+		HandOverlayMatrix full = projection * units * eyeToHead.RigidInverse() * head.RigidInverse() * overlay;
+		FLOATTYPE columnMajor[16];
+		for (int i = 0; i < 4; i++)
+			for (int j = 0; j < 4; j++)
+				columnMajor[j * 4 + i] = (FLOATTYPE)full.m[i][j];
+
+		auto* di = HWDrawInfo::StartDrawInfo(r_viewpoint.ViewLevel, nullptr, r_viewpoint, nullptr);
+		di->VPUniforms.mProjectionMatrix.loadMatrix(columnMajor);
+		ApplyVPUniforms(di);
+		di->EndDrawInfo();
+		return true;
 	}
 
 	OpenVRMode::OpenVRMode(OpenVREyePose eyes[2])

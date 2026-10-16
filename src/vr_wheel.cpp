@@ -33,11 +33,15 @@
 #include "gamestate.h"
 #include "menustate.h"
 #include "vm.h"
+#include "v_draw.h"
 
 CVAR(Bool, vr_wheel_enabled, true, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
 CVAR(Int, vr_wheel_hold_ms, 250, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
 // Read by zscript/ui/vr_wheel.zs
 CVAR(Float, vr_wheel_alpha, 0.85f, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
+// Read by gl_openvr.cpp: wheel diameter and height above the hand, in meters
+CVAR(Float, vr_wheel_size, 0.3f, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
+CVAR(Float, vr_wheel_height, 0.15f, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
 CVAR(Bool, vr_wheel_freeze, false, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)	// stop time while a wheel is open (single player)
 CVAR(Bool, vr_wheel_use_item, true, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)	// false: the item wheel only selects
 
@@ -241,4 +245,21 @@ DEFINE_ACTION_FUNCTION(_VRWheel, FromCommand)
 	PARAM_PROLOGUE;
 	PARAM_INT(wheel);
 	ACTION_RETURN_BOOL(CheckWheel(wheel).FromCommand);
+}
+
+// Everything drawn between BeginHandDraw and EndHandDraw goes to the hand of the wheel in VR.
+DEFINE_ACTION_FUNCTION(_VRWheel, BeginHandDraw)
+{
+	PARAM_PROLOGUE;
+	PARAM_INT(wheel);
+	CheckWheel(wheel);
+	twod->mVRLayer = wheel == VRWHEEL_Weapon ? VR2D_WeaponHand : VR2D_OffHand;
+	return 0;
+}
+
+DEFINE_ACTION_FUNCTION(_VRWheel, EndHandDraw)
+{
+	PARAM_PROLOGUE;
+	twod->mVRLayer = VR2D_Screen;
+	return 0;
 }
