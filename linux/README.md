@@ -166,6 +166,21 @@ Brutal Doom file only changes a few keys and expects the rest to be set already:
 These commands only exist while Brutal Doom is loaded. To get the plain layout back, load
 `index_controller.cfg` again.
 
+## Heretic and Brutal Heretic RPG
+
+Heretic uses the regular layout from `index_controller.cfg`; the item wheel on the left
+thumbstick click holds its artifacts. For Brutal Heretic RPG v6.5, load its files in the
+order of its install guide:
+
+```
+./build/gzdoomvr -iwad /path/to/HERETIC.WAD -file BrutalHereticRPG_V6.5.pk3 \
+    heretic_gz.pk3 H20MUS.wad "mk-episodic-ex[1.1.0].pk3" \
+    +exec "$PWD/linux/index_controller.cfg"
+```
+
+`Resurrectupdate.pk3` is for cooperative play only. Leave out the bundled
+`HERETIC_NZ_OPTIONS.ini`, it would replace your whole configuration.
+
 ## 3D weapons and other mods
 
 Mods are loaded as in GZDoom, in the order given after `-file`. File names are case

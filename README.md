@@ -8,8 +8,10 @@ developed for Windows and provides Windows builds only. This fork adds what is n
 build and run it on Linux, a controller setup for Valve Index controllers, and fixes for
 crashes found along the way.
 
-- Doom and Doom 2 in the headset, with the weapon in your hand and thumbstick movement
-- Brutal Doom v21 with 3D weapon models, see [Mods](#mods)
+- Doom, Doom 2 and Heretic in the headset, with the weapon in your hand and thumbstick
+  movement
+- a weapon wheel and an item wheel at your hand: hold the thumbstick click, point, let go
+- Brutal Doom v21 with 3D weapon models and Brutal Heretic RPG, see [Mods](#mods)
 - a SteamVR binding and key layout for Index controllers that you can edit, see
   [Controls](#controls)
 
@@ -17,7 +19,12 @@ crashes found along the way.
 - **Playing, controller layout, mods:** [linux/README.md](linux/README.md)
 
 There are no ready-made builds yet, you build it from source. No game data is included;
-you need your own `DOOM.WAD` or `DOOM2.WAD`.
+you need your own `DOOM.WAD`, `DOOM2.WAD` or `HERETIC.WAD`.
+
+![The weapon wheel above the right hand in Brutal Doom: the pistol is in hand, the stick points at slot 3, the trigger cycles from the assault shotgun to the shotgun, letting go switches to it](docs/images/weapon_wheel.gif)
+
+*Weapon wheel in Brutal Doom, from the pistol to the shotgun. Left eye, recorded with a
+simulated headset (Monado).*
 
 ## What it was tested with
 
@@ -103,6 +110,16 @@ Mods are loaded as in GZDoom with `-file`. Tested in this fork:
 - [br_vr](https://github.com/ajantaju/br_vr/releases), 3D weapon models for Brutal Doom
   v21 by ajantaju
 - LTP V7.0.1, liquid textures with real time reflections. It requires GZDoom 4.14.
+
+- Heretic (the original game, `HERETIC.WAD`): weapon wheel and item wheel with all
+  artifacts.
+- Brutal Heretic RPG v6.5 (from [NZDoom.net](https://nzdoom.net)) with its HD
+  textures (`heretic_gz.pk3`), HD soundtrack (`H20MUS.wad`) and `mk-episodic-ex[1.1.0].pk3`,
+  loaded in that order as its install guide says. Played on E1M1. The mod logs non-fatal
+  script errors while loading; its guide recommends the NZDoom engine over GZDoom. Its
+  weapons have no icons, so the weapon wheel shows their names. Do not load the
+  `HERETIC_NZ_OPTIONS.ini` that comes with it: it is a complete NZDoom configuration and
+  would replace your VR settings and controller layout.
 
 Started once without problems, but not looked at closely:
 
