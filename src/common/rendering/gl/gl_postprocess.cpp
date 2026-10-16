@@ -133,11 +133,13 @@ void FGLRenderer::Flush()
 			}
 			eye->AdjustHud();
 			screen->Draw2D(false);
-			if (twod->mVRLayersUsed)
+			// Other stereo modes draw the hand layers with the rest, Draw2D only filters them in VR.
+			if (vrmode->IsVR() && twod->mVRLayersUsed)
 			{
 				// VR wheels: drawn at their hand, or like the HUD while that hand is not tracked.
 				for (int layer = VR2D_WeaponHand; layer < NUM_VR2DLAYERS; layer++)
 				{
+					if (!(twod->mVRLayersUsed & (1 << layer))) continue;
 					if (!eye->AdjustHandOverlay(layer)) eye->AdjustHud();
 					twod->mVRDrawLayer = layer;
 					screen->Draw2D(false);

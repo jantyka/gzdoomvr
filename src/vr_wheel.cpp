@@ -97,16 +97,28 @@ bool VR_IsWheelOpen(EVRWheel wheel)
 	return state == WS_Open || state == WS_Releasing;
 }
 
+bool VR_WheelHoldsStick(EVRWheel wheel)
+{
+	return Wheels[wheel].State == WS_Pending || VR_IsWheelOpen(wheel);
+}
+
+// A menu, the console or the end of the level closes an open wheel without a selection. Checked
+// from the controller input and from Poll, because a wheel opened by a key may get no more input:
+// the menu swallows the key release.
+static void CloseIfBlocked(EVRWheel wheel)
+{
+	if (VR_IsWheelOpen(wheel) && !WheelCanOpen())
+	{
+		Wheels[wheel].State = WS_Idle;
+	}
+}
+
 int VR_FilterWheelClick(EVRWheel wheel, bool clickDown, float stickX, float stickY)
 {
 	auto &w = Wheels[wheel];
 	uint64_t now = I_msTime();
 
-	if (VR_IsWheelOpen(wheel) && !WheelCanOpen())
-	{
-		// A menu, the console or the end of the level closed the wheel. Nothing is selected.
-		w.State = WS_Idle;
-	}
+	CloseIfBlocked(wheel);
 
 	switch (w.State)
 	{
@@ -245,6 +257,7 @@ DEFINE_ACTION_FUNCTION(_VRWheel, Poll)
 	PARAM_PROLOGUE;
 	PARAM_INT(wheel);
 	auto &w = CheckWheel(wheel);
+	CloseIfBlocked(EVRWheel(wheel));
 	int result = 0;
 	if (VR_IsWheelOpen(EVRWheel(wheel)))
 	{

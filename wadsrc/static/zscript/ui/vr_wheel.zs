@@ -92,6 +92,7 @@ class VRWheelHandler : StaticEventHandler
 	const GAP = 1.5;			// degrees between segments
 
 	ui VRWheelState mWheels[VRWheel.NumWheels];
+	ui bool mFrozen;
 
 	//==========================================================================
 	//
@@ -188,13 +189,29 @@ class VRWheelHandler : StaticEventHandler
 		st.WasOpen = true;
 		st.Mouse = (0, 0);
 		for (int i = 0; i < 10; i++) st.SlotChoice[i] = -1;
-		if (vr_wheel_freeze) EventHandler.SendNetworkEvent("vrwheel_freeze:1");
+		UpdateFreeze();
 	}
 
 	private ui void Close(VRWheelState st)
 	{
 		st.WasOpen = false;
-		if (vr_wheel_freeze) EventHandler.SendNetworkEvent("vrwheel_freeze:0");
+		UpdateFreeze();
+	}
+
+	// Time stays frozen while any wheel is open, so closing one of two does not thaw it.
+	private ui void UpdateFreeze()
+	{
+		bool anyOpen = false;
+		for (int wheel = 0; wheel < VRWheel.NumWheels; wheel++)
+		{
+			if (mWheels[wheel] != null && mWheels[wheel].WasOpen) anyOpen = true;
+		}
+		bool freeze = anyOpen && vr_wheel_freeze;
+		if (freeze != mFrozen)
+		{
+			mFrozen = freeze;
+			EventHandler.SendNetworkEvent(freeze ? "vrwheel_freeze:1" : "vrwheel_freeze:0");
+		}
 	}
 
 	private ui static void SendChoice(int wheel, Inventory item)
@@ -428,8 +445,9 @@ class VRWheelHandler : StaticEventHandler
 
 		if (args[0] == "vrwheel_weapon")
 		{
-			let weap = Weapon(item);
-			if (weap != null && weap != player.ReadyWeapon) player.PendingWeapon = weap;
+			// Through Use like the slot keys: with the Tome of Power active this keeps the
+			// powered version of the weapon.
+			if (item is "Weapon") mo.UseInventory(item);
 		}
 		else if (args[0] == "vrwheel_useitem")
 		{

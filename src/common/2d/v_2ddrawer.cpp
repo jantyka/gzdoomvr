@@ -223,7 +223,7 @@ int F2DDrawer::AddCommand(RenderCommand *data)
 {
 	data->mScreenFade = screenFade;
 	data->mVRLayer = mVRLayer;
-	mVRLayersUsed |= mVRLayer != VR2D_Screen;
+	if (mVRLayer != VR2D_Screen) mVRLayersUsed |= 1 << mVRLayer;
 	if (mData.Size() > 0 && data->isCompatible(mData.Last()))
 	{
 		// Merge with the last command.
@@ -1205,7 +1205,10 @@ void F2DDrawer::Clear()
 		mIndices.Clear();
 		mData.Clear();
 		mIsFirstPass = true;
-		mVRLayersUsed = false;
+		mVRLayersUsed = 0;
+		// A script that aborted between VRWheel.BeginHandDraw and EndHandDraw must not take
+		// the next frame's HUD and menus to the hand.
+		mVRLayer = VR2D_Screen;
 	}
 	screenFade = 1.f;
 }

@@ -1519,16 +1519,16 @@ namespace s3d
 		int dominantClickNew = FilterWheelClick(VRWHEEL_Weapon, *pPrimaryTrackedRemoteNew, stickAxis, !dominantGripPushedNew);
 		int offClickNew = FilterWheelClick(VRWHEEL_Item, *pSecondaryTrackedRemoteNew, stickAxis, !dominantGripPushedNew);
 
-		// While a wheel is open its stick only points at the wheel. A centred copy of the controller
+		// While a wheel is open, or a click may still open it, its stick only points at the wheel. A centred copy of the controller
 		// state takes the place of the real one for the stick keys below; lastState keeps the real one.
 		VRControllerState_t dominantWheelState, offWheelState;
-		if (stickAxis != -1 && VR_IsWheelOpen(VRWHEEL_Weapon))
+		if (stickAxis != -1 && VR_WheelHoldsStick(VRWHEEL_Weapon))
 		{
 			dominantWheelState = *pPrimaryTrackedRemoteNew;
 			dominantWheelState.rAxis[stickAxis] = {};
 			pPrimaryTrackedRemoteNew = &dominantWheelState;
 		}
-		if (stickAxis != -1 && VR_IsWheelOpen(VRWHEEL_Item))
+		if (stickAxis != -1 && VR_WheelHoldsStick(VRWHEEL_Item))
 		{
 			offWheelState = *pSecondaryTrackedRemoteNew;
 			offWheelState.rAxis[stickAxis] = {};

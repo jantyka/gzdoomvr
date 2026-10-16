@@ -51,3 +51,7 @@ int VR_FilterWheelClick(EVRWheel wheel, bool clickDown, float stickX, float stic
 
 // True while the wheel is open. The stick of its hand must then neither turn nor move the player.
 bool VR_IsWheelOpen(EVRWheel wheel);
+
+// True from the start of a click that may open the wheel. The stick directions of its hand must
+// then not arrive as keys, or tilting the stick towards an entry would already trigger them.
+bool VR_WheelHoldsStick(EVRWheel wheel);

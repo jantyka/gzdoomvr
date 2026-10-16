@@ -291,7 +291,7 @@ public:
 	// ordinary 2D.
 	uint8_t mVRLayer = 0;
 	uint8_t mVRDrawLayer = 0;	// layer the running Draw2D pass draws
-	bool mVRLayersUsed = false;	// any command outside VR2D_Screen since the last Clear()
+	uint8_t mVRLayersUsed = 0;	// bit per hand layer with commands since the last Clear()
 };
 
 // DCanvas is already taken so using FCanvas instead.
